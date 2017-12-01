@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/melexis/mlx90632-library.svg?branch=master)](https://travis-ci.org/melexis/mlx90632-library)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/melexis/mlx90632-library/issues)
 
