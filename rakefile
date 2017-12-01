@@ -1,0 +1,11 @@
+#HERE = File.expand_path(File.dirname(__FILE__)) + '/'
+#UNITY_ROOT = File.expand_path(File.dirname(__FILE__)) + '/unity/'
+
+PROJECT_CEEDLING_ROOT = "tools/ceedling"
+load "#{PROJECT_CEEDLING_ROOT}/lib/ceedling/rakefile.rb"
+
+#TEMP_DIRS = [
+#	'build/test/'
+#]
+
+task :default => %w[ test:all release ]

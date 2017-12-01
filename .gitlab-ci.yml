@@ -1,0 +1,116 @@
+# @copyright (C) 2017 Melexis N.V.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+stages:
+  - test
+  - compilation
+  - documentation
+
+test_gcc_job:
+  stage: test
+  tags:
+    - docker
+  image: gcc
+#  variables:
+#    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - 'git submodule update --init --recursive'
+    - 'apt-get update && apt-get install -y ruby rake gcc-multilib gcovr'
+  script:
+    - "make utest"
+  tags:
+    - docker
+
+coverage_gcc_job:
+  stage: test
+  tags:
+    - docker
+  image: gcc
+#  variables:
+#    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - 'git submodule update --init --recursive'
+    - 'apt-get update && apt-get install -y ruby rake gcc-multilib gcovr lcov'
+  script:
+    # Funny thing but a nice bug in ceedling actually merges together targets and defaults
+    # so to keep a clean slate we remove defaults
+    - "rm -f tools/ceedling/plugins/gcov/config/defaults.yml"
+    - "make coverage"
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - 'build/coverage'
+
+test_clang_job:
+  stage: test
+  tags:
+    - docker
+  image: sbx320/clang
+#  variables:
+#    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - 'git submodule update --init --recursive'
+    - 'apt-get update && apt-get install -y ruby rake gcc-multilib lcov llvm'
+  script:
+    - "make CC=clang utest"
+  tags:
+    - docker
+
+coverage_clang_job:
+  stage: test
+  tags:
+    - docker
+  image: sbx320/clang
+#  variables:
+#    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - 'git submodule update --init --recursive'
+    - 'apt-get update && apt-get install -y ruby rake gcc-multilib lcov llvm'
+  script:
+    # Funny thing but a nice bug in ceedling actually merges together targets and defaults
+    # so to keep a clean slate we remove defaults
+    - "rm -f tools/ceedling/plugins/gcov/config/defaults.yml"
+    - "make CC=clang coverage"
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - 'build/coverage'
+
+library_publish_job:
+  stage: compilation
+  tags:
+    - docker
+  image: gcc
+  script:
+    - "make libs"
+  only:
+    - master
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - libmlx90632.a
+
+library_job:
+  stage: compilation
+  tags:
+    - docker
+  image: gcc
+  script:
+    - "make libs"
+  except:
+    - master
+

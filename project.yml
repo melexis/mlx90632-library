@@ -1,0 +1,79 @@
+:project:
+  :use_exceptions: FALSE
+  :compile_threads: 1
+  :test_threads: 1
+  :use_test_preprocessor: TRUE
+  :use_auxiliary_dependencies: TRUE
+  :use_deep_dependencies: TRUE
+  :use_mocks: TRUE
+  :build_root: 'build/'
+  # :release_build: TRUE
+  :test_file_prefix: Test
+  :options_paths:
+    - 'targets/'
+#:release_build:
+#  :output: TempSensor.out
+#  :use_assembly: FALSE
+
+:environment: []
+
+:extension:
+  :executable: .out
+
+:paths:
+  :test:
+    - +:test/*
+    - tools/ceedling/vendor/unity/src/
+    - tools/ceedling/vendor/cmock/src/
+  :source:
+    - +:src/**
+  :include:
+    - +:inc/**
+
+:defines:
+  :common: &common_defines ""
+  :test:
+    - STATIC=""
+    - INLINE=""
+    - TEST
+    - BITS_PER_LONG=64
+    - UNITY_INCLUDE_DOUBLE
+    - UNITY_SUPPORT_TEST_CASES
+:cmock:
+  :framework: :unity
+  :when_no_prototypes: :warn
+  :when_ptr: :smart
+  :treat_externs: :include
+  :enforce_strict_ordering: TRUE
+  :plugins:
+    - :ignore
+    - :callback
+    - :expect
+    - :array
+    - :return_thru_ptr
+    - :ignore_arg
+  :includes_h_pre_orig_header:
+    - 'unity.h'
+  :treat_as:
+    uint8:    HEX8
+    uint16:   HEX16
+    uint32:   UINT32
+    int8:     INT8
+    bool:     UINT8
+    int:      INT32
+    char:     INT8
+  :mock_path: 'build/test/mocks'
+  :mock_prefix: 'mock_'
+  :mock_suffix: ''
+:tools:
+# Ceedling defaults to using gcc for compiling, linking, etc.
+# As [:tools] is blank, gcc will be used (so long as it's in your system path)
+# See documentation to configure a given toolchain for use
+
+:plugins:
+  :load_paths:
+    - tools/ceedling/plugins
+  :enabled:
+    - stdout_pretty_tests_report
+    - gcov
+:colors: true

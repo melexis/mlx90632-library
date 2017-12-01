@@ -1,0 +1,3 @@
+[submodule "tools/ceedling"]
+	path = tools/ceedling
+	url = git@github.com:ThrowTheSwitch/Ceedling.git
