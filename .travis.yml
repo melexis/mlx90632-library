@@ -1,0 +1,220 @@
+# @copyright (C) 2017 Melexis N.V.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Prepare various compilers
+language: c
+sudo: required
+
+# disable the default submodule logic (we use ssh locally)
+git:
+  submodules: false
+
+stages:
+  - compile
+  - test
+  - coverage
+
+os: linux
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+  - $COPYBINS
+  - $CC --version
+  # use sed to replace the SSH URL with the public URL, then init and update submodules
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
+
+jobs:
+  include:
+# --- Compile stages ---
+    - stage: compile
+      script: make libs
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.9
+      env:
+         - MATRIX_EVAL="CC=gcc-4.9"
+      if: type IN (push, pull_request)
+    - stage: compile
+      script: make libs
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5"
+      if: type IN (push, pull_request)
+    - stage: compile
+      script: make libs
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+      env:
+         - MATRIX_EVAL="CC=gcc-7"
+    - stage: compile
+      script: make libs
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+      env:
+        - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
+      if: type IN (push, pull_request)
+    - stage: compile
+      script: make libs
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+      env:
+        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
+      if: type IN (push, pull_request)
+    - stage: compile
+      script: make libs
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+      env:
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+# --- Test stages ---
+    - stage: test
+      before_script: pip install --user gcovr==3.3
+      script: make utest
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.9
+            - ruby
+            - rake
+            - gcc-multilib
+      env:
+         - COPYBINS="sudo ln -fs /usr/bin/gcc-4.9 /usr/bin/gcc"
+      if: type IN (push, pull_request)
+    - stage: test
+      before_script: pip install --user gcovr==3.3
+      script: make utest
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - ruby
+            - rake
+            - gcc-multilib
+      env:
+         - COPYBINS="sudo ln -fs /usr/bin/gcc-5 /usr/bin/gcc"
+      if: type IN (push, pull_request)
+    - stage: test
+      before_script: pip install --user gcovr==3.3
+      script: make utest
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - ruby
+            - rake
+            - gcc-multilib
+      env:
+         - COPYBINS="sudo ln -fs /usr/bin/gcc-7 /usr/bin/gcc"
+    - stage: test
+      before_script: pip install --user gcovr==3.3
+      script: make CC=clang utest
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
+          packages:
+            - clang-3.8
+            - gcc-multilib
+            - lcov
+      env:
+        - MATRIX_EVAL="CC=clang"
+        - COPYBINS="sudo ln -fs /usr/bin/clang-3.8 /usr/bin/clang"
+      if: type IN (push, pull_request)
+    - stage: test
+      before_script: pip install --user gcovr==3.3
+      script: make CC=clang utest
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+          packages:
+            - clang-4.0
+            - gcc-multilib
+            - lcov
+      env:
+        - MATRIX_EVAL="CC=clang && CXX=clang++-4.0"
+        - COPYBINS="sudo ln -fs /usr/bin/clang-4.0 /usr/bin/clang"
+
+      if: type IN (push, pull_request)
+    - stage: test
+      before_script: pip install --user gcovr==3.3
+      script: make CC=clang utest
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+            - gcc-multilib
+            - lcov
+      env:
+        - MATRIX_EVAL="CC=clang && CXX=clang++-5.0"
+        - COPYBINS="sudo ln -fs /usr/bin/clang-5.0 /usr/bin/clang"
+# --- Coverage stages ---
+    - stage: coverage
+      before_script:
+        - pip install --user gcovr==3.3
+        - sudo ln -fs /usr/bin/gcov-6 /usr/bin/gcov
+        - git clone --branch=v1.13 https://github.com/linux-test-project/lcov.git && cd lcov && sudo make install && cd -
+      script: make coverage
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - ruby
+            - rake
+            - gcc-multilib
+      if: type IN (push, pull_request)
+      env:
+        - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
+
