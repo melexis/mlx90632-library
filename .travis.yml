@@ -235,4 +235,5 @@ jobs:
         skip_cleanup: true
         local_dir: $TRAVIS_BUILD_DIR/build/html/doxygen/html/
         github_token: $GITHUB_TOKEN
-
+        on:
+          branch: publish_docs
