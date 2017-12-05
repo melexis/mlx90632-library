@@ -202,9 +202,12 @@ jobs:
     - stage: coverage
       before_script:
         - pip install --user gcovr==3.3
+        - gem install coveralls-lcov
         - sudo ln -fs /usr/bin/gcov-6 /usr/bin/gcov
         - git clone --branch=v1.13 https://github.com/linux-test-project/lcov.git && cd lcov && sudo make install && cd -
-      script: make coverage
+      script:
+        - make coverage
+        - coveralls-lcov --repo-token ${COVERALLS_TOKEN} build/lcov.info
       os: linux
       addons:
         apt:
