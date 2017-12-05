@@ -24,6 +24,9 @@ make all	# builds unit tests, doxygen documentation, coverage information and li
 make coverage   # builds coverage information
 make clean	# cleans the crap make has made
 ```
+# Documentation
+Compiled documentation is available on [melexis.github.io/mlx90632-library](https://melexis.github.io/mlx90632-library/).
+Datasheet is available in [Melexis documentation](https://www.melexis.com/en/documents/documentation/datasheets/datasheet-mlx90632).
 
 # Example program flow
 You can either include library directly or object file. Definitions are found
