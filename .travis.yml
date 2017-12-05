@@ -24,6 +24,7 @@ stages:
   - compile
   - test
   - coverage
+  - deploy
 
 os: linux
 
@@ -220,4 +221,22 @@ jobs:
       if: type IN (push, pull_request)
       env:
         - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
-
+# --- Deploy of docs ---
+    - stage: deploy
+      # Install dependencies
+      addons:
+        apt:
+          packages:
+            - doxygen
+            - doxygen-doc
+            - doxygen-latex
+            - doxygen-gui
+            - graphviz
+      script: make doxy
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        local_dir: $TRAVIS_BUILD_DIR/build/html/doxygen/html/
+        github_token: $GITHUB_TOKEN
+        on:
+          branch: master

@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/melexis/mlx90632-library.svg?branch=master)](https://travis-ci.org/melexis/mlx90632-library)
 [![Coverage Status](https://coveralls.io/repos/github/melexis/mlx90632-library/badge.svg?branch=master)](https://coveralls.io/github/melexis/mlx90632-library?branch=master)
+[![Documentation](https://img.shields.io/badge/Documentation-published-brightgreen.svg)](https://melexis.github.io/mlx90632-library/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/melexis/mlx90632-library/issues)
 
@@ -24,6 +25,9 @@ make all	# builds unit tests, doxygen documentation, coverage information and li
 make coverage   # builds coverage information
 make clean	# cleans the crap make has made
 ```
+# Documentation
+Compiled documentation is available on [melexis.github.io/mlx90632-library](https://melexis.github.io/mlx90632-library/).
+Datasheet is available in [Melexis documentation](https://www.melexis.com/en/documents/documentation/datasheets/datasheet-mlx90632).
 
 # Example program flow
 You can either include library directly or object file. Definitions are found
