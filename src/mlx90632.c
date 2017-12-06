@@ -99,21 +99,22 @@ STATIC int mlx90632_start_measurement(void)
  * @param[out] *channel_old Pointer to memory location where old channel value is stored
  *
  * @retval 0 When both memory locations are updated as per ret
- * @retval ret If it is same are input ret variable then channel_new and channel_old
- *				were not updated
+ * @retval -EINVAL channel_new and channel_old were not updated
  */
 static int32_t mlx90632_channel_new_select(int32_t ret, uint8_t *channel_new, uint8_t *channel_old)
 {
-	if (ret == 1) {
+    switch (ret) {
+    case 1:
 		*channel_new = 1;
 		*channel_old = 2;
-	}
-	else if (ret == 2) {
-		*channel_new = 2;
+        break;
+    case 2:
+	    *channel_new = 2;
 		*channel_old = 1;
-	} else {
-		return ret;
-	}
+        break;
+    default:
+        return -EINVAL;
+    }
 	return 0;
 }
 
