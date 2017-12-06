@@ -61,52 +61,52 @@
 #define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
 #endif
 #define GENMASK(h, l) \
-			(((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
+    (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
 #endif
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0])) /**< Return number of elements in array */
 #endif
 
 /* Memory sections addresses */
-#define MLX90632_ADDR_RAM	0x4000 /**< Start address of ram */
-#define MLX90632_ADDR_EEPROM	0x2480 /**< Start address of user eeprom */
+#define MLX90632_ADDR_RAM   0x4000 /**< Start address of ram */
+#define MLX90632_ADDR_EEPROM    0x2480 /**< Start address of user eeprom */
 
 /* EEPROM addresses - used at startup */
-#define MLX90632_EE_CTRL	0x24d4 /**< Control register initial value */
+#define MLX90632_EE_CTRL    0x24d4 /**< Control register initial value */
 #define MLX90632_EE_CONTROL MLX90632_EE_CTRL /**< More human readable for Control register */
 
-#define MLX90632_EE_I2C_ADDRESS	0x24d5 /**< I2C address register initial value */
-#define MLX90632_EE_VERSION	0x240b /**< EEPROM version reg - assumed 0x101 */
+#define MLX90632_EE_I2C_ADDRESS 0x24d5 /**< I2C address register initial value */
+#define MLX90632_EE_VERSION 0x240b /**< EEPROM version reg - assumed 0x101 */
 
-#define MLX90632_EE_P_R		0x240c /**< Calibration constant ambient reference register 32bit */
-#define MLX90632_EE_P_G		0x240e /**< Calibration constant ambient gain register 32bit */
-#define MLX90632_EE_P_T		0x2410 /**< Calibration constant ambient tc2 register 32bit	*/
-#define MLX90632_EE_P_O		0x2412 /**< Calibration constant ambient offset register 32bit */
-#define MLX90632_EE_Aa		0x2414 /**< Aa calibration const register 32bit */
-#define MLX90632_EE_Ab		0x2416 /**< Ab calibration const register 32bit */
-#define MLX90632_EE_Ba		0x2418 /**< Ba calibration const register 32bit */
-#define MLX90632_EE_Bb		0x241a /**< Bb calibration const register 32bit */
-#define MLX90632_EE_Ca		0x241c /**< Ca calibration const register 32bit */
-#define MLX90632_EE_Cb		0x241e /**< Cb calibration const register 32bit */
-#define MLX90632_EE_Da		0x2420 /**< Da calibration const register 32bit */
-#define MLX90632_EE_Db		0x2422 /**< Db calibration const register 32bit */
-#define MLX90632_EE_Ea		0x2424 /**< Ea calibration constant register 32bit */
-#define MLX90632_EE_Eb		0x2426 /**< Eb calibration constant register 32bit */
-#define MLX90632_EE_Fa		0x2428 /**< Fa calibration constant register 32bit */
-#define MLX90632_EE_Fb		0x242a /**< Fb calibration constant register 32bit */
-#define MLX90632_EE_Ga		0x242c /**< Ga calibration constant register 32bit */
+#define MLX90632_EE_P_R     0x240c /**< Calibration constant ambient reference register 32bit */
+#define MLX90632_EE_P_G     0x240e /**< Calibration constant ambient gain register 32bit */
+#define MLX90632_EE_P_T     0x2410 /**< Calibration constant ambient tc2 register 32bit	*/
+#define MLX90632_EE_P_O     0x2412 /**< Calibration constant ambient offset register 32bit */
+#define MLX90632_EE_Aa      0x2414 /**< Aa calibration const register 32bit */
+#define MLX90632_EE_Ab      0x2416 /**< Ab calibration const register 32bit */
+#define MLX90632_EE_Ba      0x2418 /**< Ba calibration const register 32bit */
+#define MLX90632_EE_Bb      0x241a /**< Bb calibration const register 32bit */
+#define MLX90632_EE_Ca      0x241c /**< Ca calibration const register 32bit */
+#define MLX90632_EE_Cb      0x241e /**< Cb calibration const register 32bit */
+#define MLX90632_EE_Da      0x2420 /**< Da calibration const register 32bit */
+#define MLX90632_EE_Db      0x2422 /**< Db calibration const register 32bit */
+#define MLX90632_EE_Ea      0x2424 /**< Ea calibration constant register 32bit */
+#define MLX90632_EE_Eb      0x2426 /**< Eb calibration constant register 32bit */
+#define MLX90632_EE_Fa      0x2428 /**< Fa calibration constant register 32bit */
+#define MLX90632_EE_Fb      0x242a /**< Fb calibration constant register 32bit */
+#define MLX90632_EE_Ga      0x242c /**< Ga calibration constant register 32bit */
 
-#define MLX90632_EE_Gb		0x242e /**< Ambient Beta calibration constant 16bit */
-#define MLX90632_EE_Ka		0x242f /**< IR Beta calibration constant 16bit */
+#define MLX90632_EE_Gb      0x242e /**< Ambient Beta calibration constant 16bit */
+#define MLX90632_EE_Ka      0x242f /**< IR Beta calibration constant 16bit */
 
-#define MLX90632_EE_Ha		0x2481 /**< Ha customer calibration value register 16bit */
-#define MLX90632_EE_Hb		0x2482 /**< Hb customer calibration value register 16bit */
+#define MLX90632_EE_Ha      0x2481 /**< Ha customer calibration value register 16bit */
+#define MLX90632_EE_Hb      0x2482 /**< Hb customer calibration value register 16bit */
 
 /* Register addresses - volatile */
-#define MLX90632_REG_I2C_ADDR	0x3000 /**< Chip I2C address register */
+#define MLX90632_REG_I2C_ADDR   0x3000 /**< Chip I2C address register */
 
 /* Control register address - volatile */
-#define MLX90632_REG_CTRL	0x3001 /**< Control Register address */
+#define MLX90632_REG_CTRL   0x3001 /**< Control Register address */
 #define   MLX90632_CFG_SOC_SHIFT 3 /**< Start measurement in step mode */
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
@@ -118,29 +118,29 @@
 #define MLX90632_PWR_STATUS_CONTINUOUS MLX90632_PWR_STATUS(3) /**< Pwrmode continuous*/
 
 /* Device status register - volatile */
-#define MLX90632_REG_STATUS	0x3fff /**< Device status register */
-#define   MLX90632_STAT_BUSY	BIT(10) /**< Device busy indicator */
-#define   MLX90632_STAT_EE_BUSY	BIT(9) /**< Device EEPROM busy indicator */
-#define   MLX90632_STAT_BRST	BIT(8) /**< Device brown out reset indicator */
+#define MLX90632_REG_STATUS 0x3fff /**< Device status register */
+#define   MLX90632_STAT_BUSY    BIT(10) /**< Device busy indicator */
+#define   MLX90632_STAT_EE_BUSY BIT(9) /**< Device EEPROM busy indicator */
+#define   MLX90632_STAT_BRST    BIT(8) /**< Device brown out reset indicator */
 #define   MLX90632_STAT_CYCLE_POS GENMASK(6, 2) /**< Data position in measurement table */
-#define   MLX90632_STAT_DATA_RDY	BIT(0) /**< Data ready indicator */
+#define   MLX90632_STAT_DATA_RDY    BIT(0) /**< Data ready indicator */
 
 /* RAM_MEAS address-es for each channel */
-#define MLX90632_RAM_1(meas_num)	(MLX90632_ADDR_RAM + 3 * meas_num)
-#define MLX90632_RAM_2(meas_num)	(MLX90632_ADDR_RAM + 3 * meas_num + 1)
-#define MLX90632_RAM_3(meas_num)	(MLX90632_ADDR_RAM + 3 * meas_num + 2)
+#define MLX90632_RAM_1(meas_num)    (MLX90632_ADDR_RAM + 3 * meas_num)
+#define MLX90632_RAM_2(meas_num)    (MLX90632_ADDR_RAM + 3 * meas_num + 1)
+#define MLX90632_RAM_3(meas_num)    (MLX90632_ADDR_RAM + 3 * meas_num + 2)
 
 /* Timings (ms) */
 #define MLX90632_TIMING_EEPROM 100 /**< Time between EEPROM writes */
 
 /* Magic constants */
-#define MLX90632_EEPROM_VERSION	0x105 /**< EEPROM DSP version for constants */
+#define MLX90632_EEPROM_VERSION 0x105 /**< EEPROM DSP version for constants */
 #define MLX90632_EEPROM_WRITE_KEY 0x554C /**< EEPROM write key 0x55 and 0x4c */
-#define MLX90632_RESET_CMD	0x0006 /**< Reset sensor (address or global) */
-#define MLX90632_MAX_MEAS_NUM	31 /**< Maximum number of measurements in list */
-#define MLX90632_EE_SEED	0x3f6d /**< Seed for the CRC calculations */
-#define MLX90632_REF_12	12.0 /**< ResCtrlRef value of Channel 1 or Channel 2 */
-#define MLX90632_REF_3	12.0 /**< ResCtrlRef value of Channel 3 */
+#define MLX90632_RESET_CMD  0x0006 /**< Reset sensor (address or global) */
+#define MLX90632_MAX_MEAS_NUM   31 /**< Maximum number of measurements in list */
+#define MLX90632_EE_SEED    0x3f6d /**< Seed for the CRC calculations */
+#define MLX90632_REF_12 12.0 /**< ResCtrlRef value of Channel 1 or Channel 2 */
+#define MLX90632_REF_3  12.0 /**< ResCtrlRef value of Channel 3 */
 
 /** Read raw ambient and object temperature
  *
@@ -159,7 +159,7 @@
  * @retval <0 Something went wrong. Check errno.h for more details
  */
 int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
-							   int16_t *object_new_raw, int16_t *object_old_raw);
+                               int16_t *object_new_raw, int16_t *object_old_raw);
 
 /** Calculation of raw ambient output
  *
@@ -192,8 +192,8 @@ double mlx90632_preprocess_temp_ambient(int16_t ambient_new_raw, int16_t ambient
  * @return Calculated object raw output
  */
 double mlx90632_preprocess_temp_object(int16_t object_new_raw, int16_t object_old_raw,
-									   int16_t ambient_new_raw, int16_t ambient_old_raw,
-									   int16_t Ka);
+                                       int16_t ambient_new_raw, int16_t ambient_old_raw,
+                                       int16_t Ka);
 
 /** Calculation of ambient temperature
  *
@@ -212,7 +212,7 @@ double mlx90632_preprocess_temp_object(int16_t object_new_raw, int16_t object_ol
  * @return Calculated ambient temperature degrees Celsius
  */
 double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_raw, int32_t P_T,
-								  int32_t P_R, int32_t P_G, int32_t P_O, int16_t Gb);
+                                  int32_t P_R, int32_t P_G, int32_t P_O, int16_t Gb);
 
 /** Calculation of object temperature
  *
@@ -235,8 +235,8 @@ double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_r
  * @return Calculated object temperature in milliCelsius
  */
 double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
-									int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
-									int16_t Ha, int16_t Hb);
+                                 int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
+                                 int16_t Ha, int16_t Hb);
 
 /** Initialize MLX90632 driver and confirm EEPROM version
  *
@@ -270,7 +270,7 @@ double mlx90632_get_emissivity(void);
 int mlx90632_start_measurement(void);
 int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw);
 int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
-									  int16_t *object_new_raw, int16_t *object_old_raw);
+                                      int16_t *object_new_raw, int16_t *object_old_raw);
 #endif
 
 #endif

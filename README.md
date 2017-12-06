@@ -24,6 +24,7 @@ make utest	# builds and runs unit test program mlx90632 (dependent on ceedling)
 make all	# builds unit tests, doxygen documentation, coverage information and library
 make coverage   # builds coverage information
 make clean	# cleans the crap make has made
+make uncrustify # style fixup of the source, header and test files
 ```
 # Documentation
 Compiled documentation is available on [melexis.github.io/mlx90632-library](https://melexis.github.io/mlx90632-library/).

@@ -22,6 +22,7 @@ git:
 
 stages:
   - compile
+  - style
   - test
   - coverage
   - deploy
@@ -104,6 +105,19 @@ jobs:
             - clang-5.0
       env:
         - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+# --- Style check stages ---
+    - stage: style
+      before_script: git clone https://github.com/uncrustify/uncrustify.git && cd uncrustify && mkdir build && cd build && cmake .. && sudo make install && cd ../..
+      script: make ci_uncrustify
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+      env:
+        - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
+      if: type IN (push, pull_request)
 # --- Test stages ---
     - stage: test
       before_script: pip install --user gcovr==3.3

@@ -22,6 +22,7 @@
  * make all	# builds unit tests, doxygen documentation, coverage information and library
  * make coverage   # builds coverage information
  * make clean	# cleans the crap make has made
+ * make uncrustify # style fixup of the source, header and test files
  * \endcode
  *
  * Datasheet is available in [Melexis documentation](https://www.melexis.com/en/documents/documentation/datasheets/datasheet-mlx90632).
