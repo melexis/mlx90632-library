@@ -17,8 +17,12 @@ VERSION = $(shell echo `git describe --always --long --abbrev=8 --dirty`)
 
 # Include sources into compilation
 SRCS +=	$(wildcard src/*.c)
-UNIT_TESTS += $(wildcard unit_test/*.c)
+UNIT_TESTS += $(wildcard test/*.c)
 INCLUDE = -Iinc/
+UNCRUSTIFY_FILES = $(SRCS) \
+		   $(UNIT_TESTS) \
+		   $(wildcard inc/*.h)
+
 # From sources list include .h files for dependencies
 DEPS +=	$(wildcard inc/*.h)
 
@@ -116,6 +120,12 @@ coverage:
 	@rake -m -j 4 options:$(CC) clobber gcov:all
 	@lcov --directory $(OBJDIR)/gcov/out/ --output-file $(OBJDIR)/lcov.info $(LCOVFLAGS) $(LCOVCONFIG)
 	@genhtml $(OBJDIR)/lcov.info -o $(OBJDIR)/coverage/ $(LCOVCONFIG)
+
+uncrustify:
+	uncrustify -c tools/uncrustify.cfg --replace --no-backup -l C $(UNCRUSTIFY_FILES)
+
+ci_uncrustify:
+	uncrustify -c tools/uncrustify.cfg --check -l C $(UNCRUSTIFY_FILES)
 
 
 
