@@ -42,86 +42,84 @@ void SetUp(void)
  */
 void test_init_success(void)
 {
-	uint16_t eeprom_version_mock = 0x105;
-	uint16_t reg_status_mock = 0x47; // cycle position 1 & data ready
+    uint16_t eeprom_version_mock = 0x105;
+    uint16_t reg_status_mock = 0x47; // cycle position 1 & data ready
 
-	// Confirm EEPROM version
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-	mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
+    // Confirm EEPROM version
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
 
-	// Read REG_STATUS
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-	mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+    // Read REG_STATUS
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
 
-	// Reset EOC and NewData
-	mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
+    // Reset EOC and NewData
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
 
-	TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
 }
 
 void test_init_wrong_eeprom_version(void)
 {
-	uint16_t eeprom_version_mock = 0x103;
+    uint16_t eeprom_version_mock = 0x103;
 
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-	mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
 
-	TEST_ASSERT_EQUAL_INT(-EPROTONOSUPPORT, mlx90632_init());
-
-
+    TEST_ASSERT_EQUAL_INT(-EPROTONOSUPPORT, mlx90632_init());
 }
 
 void test_init_i2c_read_fails(void)
 {
-	uint16_t eeprom_version_mock = 0x103;
+    uint16_t eeprom_version_mock = 0x103;
 
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, -EBUSY);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, -EBUSY);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
 
-	TEST_ASSERT_EQUAL_INT(-EBUSY, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(-EBUSY, mlx90632_init());
 }
 
 void test_init_i2c_read_fails2(void)
 {
-	uint16_t eeprom_version_mock = 0x105;
-	uint16_t reg_status_mock = 0x47; // cycle position 1 & data ready
+    uint16_t eeprom_version_mock = 0x105;
+    uint16_t reg_status_mock = 0x47; // cycle position 1 & data ready
 
-	// Confirm EEPROM version
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-	mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
+    // Confirm EEPROM version
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
 
-	// Read REG_STATUS
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-	mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+    // Read REG_STATUS
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
 
-	TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_init());
 }
 
 void test_init_i2c_read_fails3(void)
 {
-	uint16_t eeprom_version_mock = 0x105;
-	uint16_t reg_status_mock = 0x47; // cycle position 1 & data ready
+    uint16_t eeprom_version_mock = 0x105;
+    uint16_t reg_status_mock = 0x47; // cycle position 1 & data ready
 
-	// Confirm EEPROM version
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-	mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
+    // Confirm EEPROM version
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
 
-	// Read REG_STATUS
-	mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
-	mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-	mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+    // Read REG_STATUS
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
 
 
-	// Reset NewData
-	mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, -EPERM);
+    // Reset NewData
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, -EPERM);
 
-	TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_init());
 }
 
 ///@}
