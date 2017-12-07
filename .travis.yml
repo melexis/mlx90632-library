@@ -225,10 +225,10 @@ jobs:
           project:
             name: "melexis/mlx90632-library"
             description: "Melexis 90632 Driver library"
-            notification_email: ${COVERITY_MAIL}
-            build_command_prepend: "make clean"
-            build_command:   "make libs"
-            branch_pattern: coverity_setup
+          notification_email: ${COVERITY_MAIL}
+          build_command_prepend: "make clean"
+          build_command:   "make libs"
+          branch_pattern: coverity_setup
       on:
         branch: coverity_setup
       env:
