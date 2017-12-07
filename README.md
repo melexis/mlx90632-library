@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/melexis/mlx90632-library.svg?branch=master)](https://travis-ci.org/melexis/mlx90632-library)
 [![Coverage Status](https://coveralls.io/repos/github/melexis/mlx90632-library/badge.svg?branch=master)](https://coveralls.io/github/melexis/mlx90632-library?branch=master)
-![Uncrustify](https://img.shields.io/badge/uncrustify-pass-brightgreen.svg)]
+![Uncrustify](https://img.shields.io/badge/uncrustify-pass-brightgreen.svg)
 [![Coverity Scan](https://img.shields.io/coverity/scan/14522.svg)](https://scan.coverity.com/projects/melexis-mlx90632-library)
 [![Documentation](https://img.shields.io/badge/Documentation-published-brightgreen.svg)](https://melexis.github.io/mlx90632-library/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
