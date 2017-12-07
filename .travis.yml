@@ -20,10 +20,15 @@ sudo: required
 git:
   submodules: false
 
+env:
+  global:
+    - secure: "PFHiivb3mm5Ky4eGE1w73rLK2RE2QygkzblqCPa7tyOXfDSopIvTFXcTdM6NOx71Ih/0FNzepHduPtJrCNW23tXRq1hVkCcwn6DcxfNC9y/s6Bcui/eIJasSiNxAx9lG885/pYX5RB4Xv1edm0a7d0ZsGdcim9HNJvdHmYjCFDyP2oABdlhkx+7blTxyPpx0mgCDMBmrhJlqbCRZ70ZlpzYx42nJRuVyHY+DwN/2hI5jS1S3ZEaf0aaaOC1aV4Im29mW2EZ//TPzemjfPd0dr6pe9lmZHTsi3Abd37nFppVSA6mlX2IBxsYfqdAFN53khiuH4j5sdWgLlBryXya2sEJuiFJFj4TgTBzZQlYM5cZ1j6vToUJZaOtymrFNvOuJZEVRlZjj6DoPSvhlf0EjaLVfBccW78LHpZI4s/ukCdjK91Y1MUETvSY4JUc0kZYIMDD9yWDyk0j/4hhlbSKVqdWyYzTRPnmDGSUoFcuXJe/COYm4axtoiv1XkL9DJfVAJB7j/kK9zDCMMEP0n4S4ZpaIP4jTZkWMOhae5Tr5gOX0ruNpOBhviV7Z6cxLJy5kX/vMNo2GVzmGEEytdz0iMT4a/MUi6Xu6jqQD5kK1cDk0G2jZKhzds1b2MLVpZwVMXr/tvYhY+XlJ2Q9Jgwz/RJ3pl/l6HewcU5VvbwkDW80="
+
 stages:
   - compile
   - style
   - test
+  - static
   - coverage
   - deploy
 
@@ -109,14 +114,6 @@ jobs:
     - stage: style
       before_script: git clone https://github.com/uncrustify/uncrustify.git && cd uncrustify && mkdir build && cd build && cmake .. && sudo make install && cd ../..
       script: make ci_uncrustify
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - gcc-6
-      env:
-        - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
       if: type IN (push, pull_request)
 # --- Test stages ---
     - stage: test
@@ -212,6 +209,32 @@ jobs:
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++-5.0"
         - COPYBINS="sudo ln -fs /usr/bin/clang-5.0 /usr/bin/clang"
+# --- Static analysis stages ---
+    - stage: static
+      before_install:
+        - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+      script:
+        - 'echo "Do not build for Coverity Scan"'
+        - 'exit 0'
+      os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+        coverity_scan:
+          project:
+            name: "melexis/mlx90632-library"
+            description: "Melexis 90632 Driver library"
+          notification_email: ${COVERITY_MAIL}
+          build_command_prepend: "make clean"
+          build_command:   "make libs"
+          branch_pattern: master
+      on:
+        branch: master
+      env:
+        - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
 # --- Coverage stages ---
     - stage: coverage
       before_script:
