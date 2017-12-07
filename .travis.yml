@@ -230,9 +230,9 @@ jobs:
           notification_email: ${COVERITY_MAIL}
           build_command_prepend: "make clean"
           build_command:   "make libs"
-          branch_pattern: coverity_setup
+          branch_pattern: master
       on:
-        branch: coverity_setup
+        branch: master
       env:
         - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
 # --- Coverage stages ---
