@@ -78,7 +78,7 @@ int main(void)
                                                         ambient_new_raw, ambient_old_raw,
                                                         Ka);
     /* Calculate object temperature */
-    object = mlx90632_calc_temp_object(object, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+    object = mlx90632_calc_temp_object(pre_object, pre_ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 }
 ```
 
