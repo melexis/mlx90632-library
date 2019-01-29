@@ -134,8 +134,8 @@
 #define MLX90632_TIMING_EEPROM 100 /**< Time between EEPROM writes */
 
 /* Magic constants */
-#define MLX90632_ID_MEDICAL	0x0105 /* EEPROM DSPv5 Medical device id */
-#define MLX90632_ID_CONSUMER	0x0205 /* EEPROM DSPv5 Consumer device id */
+#define MLX90632_ID_MEDICAL 0x0105 /* EEPROM DSPv5 Medical device id */
+#define MLX90632_ID_CONSUMER    0x0205 /* EEPROM DSPv5 Consumer device id */
 #define MLX90632_EEPROM_VERSION MLX90632_ID_MEDICAL /**< Legacy define - to be deprecated */
 #define MLX90632_EEPROM_WRITE_KEY 0x554C /**< EEPROM write key 0x55 and 0x4c */
 #define MLX90632_RESET_CMD  0x0006 /**< Reset sensor (address or global) */
