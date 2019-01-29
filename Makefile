@@ -116,7 +116,6 @@ utest:
 coverage:
 	@echo "Produce coverage information"
 	@mkdir -p build
-	@rm -f tools/ceedling/plugins/gcov/config/defaults.yml # we delete these because settings are merged
 	@rake -m -j 4 options:$(CC) clobber gcov:all
 	@lcov --directory $(OBJDIR)/gcov/out/ --output-file $(OBJDIR)/lcov.info $(LCOVFLAGS) $(LCOVCONFIG)
 	@genhtml $(OBJDIR)/lcov.info -o $(OBJDIR)/coverage/ $(LCOVCONFIG)

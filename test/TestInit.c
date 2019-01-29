@@ -30,6 +30,7 @@
 #include <math.h>
 #include <errno.h>
 
+#include "unity.h"
 #include "mlx90632.h"
 
 #include "mock_mlx90632_depends.h"

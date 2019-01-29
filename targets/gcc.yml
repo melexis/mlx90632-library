@@ -1,19 +1,19 @@
-:flags:
-  :test:
-    :compile:
-      - -m64
-      - -Wall
-      - -Wno-address
-      - -std=c99
-      - -pedantic
-      - -g
-      - -fprofile-arcs
-      - -ftest-coverage
-    :link:
-      - -lm
-      - -m64
-      - -lgcov
-      - --coverage
+#:flags:
+#  :test:
+#    :compile:
+#      - -m64
+#      - -Wall
+#      - -Wno-address
+#      - -std=c99
+#      - -pedantic
+#      - -g
+#      - -fprofile-arcs
+#      - -ftest-coverage
+#    :link:
+#      - -lm
+#      - -m64
+#      - -lgcov
+#      - --coverage
 
 :tools:
   :test_compiler:
@@ -51,8 +51,6 @@
       - -ftest-coverage
       - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
       - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-      - -c ${1}                       #source code input file (Ruby method call param list sub)
-      - -o ${2}                       #object file output (Ruby method call param list sub)
   :gcov_linker:
     :executable: gcc
     :arguments:
@@ -63,7 +61,6 @@
       - --coverage
       - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
       - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-      - -o ${2}            #executable file output (Ruby method call param list sub)
   :gcov_fixture:
     :executable: ${1}
   :gcov_report:
