@@ -359,7 +359,7 @@ int32_t mlx90632_init(void)
         return ret;
     }
 
-    if ((eeprom_version != MLX90632_ID_MEDICAL) && (eeprom_version != MLX90632_ID_CONSUMER))
+    if ((eeprom_version & 0x00FF) != MLX90632_DSPv5)
     {
         // this here can fail because of big/little endian of cpu/i2c
         return -EPROTONOSUPPORT;
