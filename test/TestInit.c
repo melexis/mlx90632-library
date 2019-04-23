@@ -77,7 +77,7 @@ void test_init_success(void)
 
     TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
 
-    // test also better accuracy
+    // test also another calibration id
     eeprom_version_mock = 0x305;
 
     // Confirm EEPROM version
