@@ -38,8 +38,7 @@ void SetUp(void)
 {
 }
 
-/** Test initialization process
- */
+/** Test initialization process */
 void test_init_success(void)
 {
     uint16_t eeprom_version_mock = 0x105;
@@ -62,6 +61,24 @@ void test_init_success(void)
 
     // test also ID_CONSUMER
     eeprom_version_mock = 0x205;
+
+    // Confirm EEPROM version
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
+
+    // Read REG_STATUS
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    // Reset EOC and NewData
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
+
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
+
+    // test also better accuracy
+    eeprom_version_mock = 0x305;
 
     // Confirm EEPROM version
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
