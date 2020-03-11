@@ -94,7 +94,7 @@ jobs:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-4.0
+            - 
           packages:
             - clang-4.0
       env:
@@ -175,7 +175,7 @@ jobs:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-4.0
+            - 
           packages:
             - clang-4.0
             - gcc-multilib
@@ -191,7 +191,7 @@ jobs:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-5.0
+            - 
           packages:
             - clang-5.0
             - gcc-multilib
