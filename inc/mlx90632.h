@@ -58,7 +58,7 @@
 #ifndef GENMASK
 #ifndef BITS_PER_LONG
 #warning "Using default BITS_PER_LONG value"
-#define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
+#define BITS_PER_LONG 32 /**< Define how many bits per long your CPU has */
 #endif
 #define GENMASK(h, l) \
     (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
@@ -80,7 +80,7 @@
 
 #define MLX90632_EE_P_R     0x240c /**< Calibration constant ambient reference register 32bit */
 #define MLX90632_EE_P_G     0x240e /**< Calibration constant ambient gain register 32bit */
-#define MLX90632_EE_P_T     0x2410 /**< Calibration constant ambient tc2 register 32bit	*/
+#define MLX90632_EE_P_T     0x2410 /**< Calibration constant ambient tc2 register 32bit */
 #define MLX90632_EE_P_O     0x2412 /**< Calibration constant ambient offset register 32bit */
 #define MLX90632_EE_Aa      0x2414 /**< Aa calibration const register 32bit */
 #define MLX90632_EE_Ab      0x2416 /**< Ab calibration const register 32bit */
@@ -167,9 +167,9 @@ int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_ra
  * Preprocessing of the raw ambient value
  *
  * @param[in] ambient_new_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_num 1 or 2 is
- *								determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] ambient_old_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_num 1 or 2 is
- *								determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] Gb Register value on @link MLX90632_EE_Gb @endlink
  *
  * @return Calculated ambient raw output
@@ -181,13 +181,13 @@ double mlx90632_preprocess_temp_ambient(int16_t ambient_new_raw, int16_t ambient
  * Preprocessing of the raw object value
  *
  * @param[in] object_new_raw object temperature from @link MLX90632_RAM_1 @endlink or @link MLX90632_RAM_2 @endlink.
- *								The meas_number 1 or 2 is determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              The meas_number 1 or 2 is determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] object_old_raw object temperature from @link MLX90632_RAM_1 @endlink or @link MLX90632_RAM_2 @endlink.
- *								The meas_number 1 or 2 is determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              The meas_number 1 or 2 is determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] ambient_new_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_number 1 or 2 is
- *								determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] ambient_old_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The meas_number 1 or 2 is
- *								determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] Ka Register value on @link MLX90632_EE_Ka @endlink
  *
  * @return Calculated object raw output
@@ -201,9 +201,9 @@ double mlx90632_preprocess_temp_object(int16_t object_new_raw, int16_t object_ol
  * DSPv5 implementation of ambient temperature calculation
  *
  * @param[in] ambient_new_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The channel 1 or 2 is
- *								determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              determined by value in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] ambient_old_raw ambient temperature from @link MLX90632_RAM_3 @endlink. The channel 1 or 2 is
- *								determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
+ *                              determined by value not in @link MLX90632_STAT_CYCLE_POS @endlink
  * @param[in] P_T Register value on @link MLX90632_EE_P_T @endlink
  * @param[in] P_R Register value on @link MLX90632_EE_P_R @endlink
  * @param[in] P_G Register value on @link MLX90632_EE_P_G @endlink
@@ -238,6 +238,31 @@ double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_r
 double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
                                  int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
                                  int16_t Ha, int16_t Hb);
+
+/** Calculation of object temperature when the environment temperature differs from the sensor temperature
+ *
+ * DSPv5 implementation of object temperature calculation with customer
+ * calibration data
+ *
+ * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
+ * @param[in] ambient sensor ambient temperature from @link mlx90632_preprocess_temp_ambient @endlink
+ * @param[in] reflected reflected (environment) temperature from a sensor different than the MLX90632 or acquired by other means
+ * @param[in] Ea Register value on @link MLX90632_EE_Ea @endlink
+ * @param[in] Eb Register value on @link MLX90632_EE_Eb @endlink
+ * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
+ * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
+ * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
+ * @param[in] Ha Register value on @link MLX90632_EE_Ha @endlink
+ * @param[in] Hb Register value on @link MLX90632_EE_Hb @endlink
+ *
+ * @note emissivity Value provided by user of the object emissivity
+ * using @link mlx90632_set_emissivity @endlink function.
+ *
+ * @return Calculated object temperature in milliCelsius
+ */
+double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, double reflected,
+                                 int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
+                                 int16_t Ha, int16_t Hb);                                 
 
 /** Initialize MLX90632 driver and confirm EEPROM version
  *
