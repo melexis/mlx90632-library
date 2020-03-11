@@ -234,7 +234,7 @@ jobs:
         - git clone --branch=v1.13 https://github.com/linux-test-project/lcov.git && cd lcov && sudo make install && cd -
       script:
         - make coverage
-        - coveralls-lcov --repo-token ${COVERALLS_TOKEN} build/lcov.info
+        - coveralls-lcov --repo-token=${COVERALLS_TOKEN} build/lcov.info
       os: linux
       addons:
         apt:
