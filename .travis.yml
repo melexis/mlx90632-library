@@ -100,16 +100,6 @@ jobs:
       env:
         - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
       if: type IN (push, pull_request)
-    - stage: compile
-      script: make libs
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - clang-5.0
-      env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 # --- Style check stages ---
     - stage: style
       before_script: git clone https://github.com/uncrustify/uncrustify.git && cd uncrustify && mkdir build && cd build && cmake .. && sudo make install && cd ../..
