@@ -107,18 +107,18 @@ static int32_t mlx90632_channel_new_select(int32_t ret, uint8_t *channel_new, ui
 {
     switch (ret)
     {
-        case 1:
-            *channel_new = 1;
-            *channel_old = 2;
-            break;
+    case 1:
+        *channel_new = 1;
+        *channel_old = 2;
+        break;
 
-        case 2:
-            *channel_new = 2;
-            *channel_old = 1;
-            break;
+    case 2:
+        *channel_new = 2;
+        *channel_old = 1;
+        break;
 
-        default:
-            return -EINVAL;
+    default:
+        return -EINVAL;
     }
     return 0;
 }
@@ -169,7 +169,7 @@ STATIC int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t 
  * @retval <0 Something went wrong. Check errno.h for more details.
  */
 STATIC int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
-                                             int16_t *object_new_raw, int16_t *object_old_raw)
+        int16_t *object_new_raw, int16_t *object_old_raw)
 {
     int32_t ret;
     uint16_t read_tmp;
@@ -285,8 +285,8 @@ double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_r
  * @return Calculated object temperature for current iteration in milliCelsius
  */
 static double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32_t object, double TAdut,
-                                                  int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
-                                                  double emissivity)
+        int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
+        double emissivity)
 {
     double calcedGa, calcedGb, calcedFa, TAdut4, first_sqrt;
     // temp variables
@@ -331,8 +331,8 @@ static double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32
  * @return Calculated object temperature for current iteration in milliCelsius
  */
 static double mlx90632_calc_temp_object_iteration_reflected(double prev_object_temp, int32_t object, double TAdut, double TaTr4,
-                                                            int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
-                                                            double emissivity)
+        int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
+        double emissivity)
 {
     double calcedGa, calcedGb, calcedFa, TAdut4, first_sqrt;
     // temp variables
@@ -346,8 +346,8 @@ static double mlx90632_calc_temp_object_iteration_reflected(double prev_object_t
     calcedGb = KsTAtmp / ((double)68719476736.0);
     Alpha_corr = (((double)(Fa * POW10)) * Ha_customer * (double)(1 + calcedGa + calcedGb)) /
                  ((double)70368744177664.0);
-    calcedFa = object / (emissivity * (Alpha_corr / POW10));    
-    
+    calcedFa = object / (emissivity * (Alpha_corr / POW10));
+
     first_sqrt = sqrt(calcedFa + TaTr4);
 
     return sqrt(first_sqrt) - 273.15 - Hb_customer;
@@ -393,8 +393,8 @@ double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
 }
 
 double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, double reflected,
-                                           int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
-                                           int16_t Ha, int16_t Hb)
+        int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
+        int16_t Ha, int16_t Hb)
 {
     double kEa, kEb, TAdut;
     double temp = 25.0;
@@ -402,11 +402,11 @@ double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, doub
     double TaTr4;
     double ta4;
     int8_t i;
-    
+
     kEa = ((double)Ea) / ((double)65536.0);
     kEb = ((double)Eb) / ((double)256.0);
     TAdut = (((double)ambient) - kEb) / kEa + 25;
-    
+
     TaTr4 = reflected + 273.15;
     TaTr4 = TaTr4 * TaTr4;
     TaTr4 = TaTr4 * TaTr4;
