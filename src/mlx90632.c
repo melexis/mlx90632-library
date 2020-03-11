@@ -334,7 +334,7 @@ static double mlx90632_calc_temp_object_iteration_reflected(double prev_object_t
                                                             int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
                                                             double emissivity)
 {
-    double calcedGa, calcedGb, calcedFa, TAdut4, first_sqrt;
+    double calcedGa, calcedGb, calcedFa, first_sqrt;
     // temp variables
     double KsTAtmp, Alpha_corr;
     double Ha_customer, Hb_customer;
