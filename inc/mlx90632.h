@@ -261,8 +261,8 @@ double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
  * @return Calculated object temperature in milliCelsius
  */
 double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, double reflected,
-        int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
-        int16_t Ha, int16_t Hb);
+                                           int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
+                                           int16_t Ha, int16_t Hb);
 
 /** Initialize MLX90632 driver and confirm EEPROM version
  *
