@@ -119,8 +119,8 @@ void test_dsp_object_reflected(void)
     mlx90632_set_emissivity(1.0);
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 55.507, dspv5_object_reflected_helper(609, 611, 22454, 23030, 40.00));
     mlx90632_set_emissivity(0.1);
-    TEST_ASSERT_DOUBLE_WITHIN(0.01, 97.839, dspv5_object_reflected_helper(609, 611, 22454, 23030, 49.66));
-    TEST_ASSERT_DOUBLE_WITHIN(0.01, 143.467, dspv5_object_reflected_helper(609, 611, 22454, 23030, 40.00));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 98.141, dspv5_object_reflected_helper(609, 611, 22454, 23030, 49.66));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 143.956, dspv5_object_reflected_helper(609, 611, 22454, 23030, 40.00));
 
     mlx90632_set_emissivity(ke);
 }
