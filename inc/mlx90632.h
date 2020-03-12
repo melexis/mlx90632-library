@@ -241,7 +241,10 @@ double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
 
 /** Calculation of object temperature when the environment temperature differs from the sensor temperature
  *
- * DSPv5 implementation of object temperature calculation with customer
+ * when the object has emissivity lower than 1 then it does not just emit InfraRed light, but also reflects it.
+ * That is why measurement of the ambient temperature around object is important to help calculating more precise object temperature.
+ * This function makes it possible to add object environment temperature and offset it with sensor's ambient temperature to calculate more precise
+ * object temeprature. DSPv5 implementation of object temperature calculation with customer
  * calibration data
  *
  * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
