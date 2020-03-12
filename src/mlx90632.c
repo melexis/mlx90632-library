@@ -271,8 +271,8 @@ double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_r
  * implemented.
  *
  * @param[in] prev_object_temp previously calculated object temperature. If
- *								there is no previously calculated temperature
- *								input 25.0
+ *                              there is no previously calculated temperature
+ *                              input 25.0
  * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
  * @param[in] TAdut ambient temperature coefficient
  * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
@@ -305,6 +305,50 @@ static double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32
     TAdut4 = (TAdut + 273.15) * (TAdut + 273.15) * (TAdut + 273.15) * (TAdut + 273.15);
 
     first_sqrt = sqrt(calcedFa + TAdut4);
+
+    return sqrt(first_sqrt) - 273.15 - Hb_customer;
+}
+
+/** Iterative calculation of object temperature  when the environment temperature differs from the sensor temperature
+ *
+ * DSPv5 requires 3 iterations to reduce noise for object temperature. Since
+ * each iteration requires same calculations this helper function is
+ * implemented.
+ *
+ * @param[in] prev_object_temp previously calculated object temperature. If
+ *                              there is no previously calculated temperature
+ *                              input 25.0
+ * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
+ * @param[in] TAdut ambient temperature coefficient
+ * @param[in] Tr reflected (environment) temperature from a sensor different than the MLX90632 or acquired by other means
+ * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
+ * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
+ * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
+ * @param[in] Ha Register value on @link MLX90632_EE_Ha @endlink
+ * @param[in] Hb Register value on @link MLX90632_EE_Hb @endlink
+ * @param[in] emissivity Value provided by user of the object emissivity
+ *
+ * @return Calculated object temperature for current iteration in milliCelsius
+ */
+static double mlx90632_calc_temp_object_iteration_reflected(double prev_object_temp, int32_t object, double TAdut, double TaTr4,
+                                                            int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
+                                                            double emissivity)
+{
+    double calcedGa, calcedGb, calcedFa, first_sqrt;
+    // temp variables
+    double KsTAtmp, Alpha_corr;
+    double Ha_customer, Hb_customer;
+
+    Ha_customer = Ha / ((double)16384.0);
+    Hb_customer = Hb / ((double)1024.0);
+    calcedGa = ((double)Ga * (prev_object_temp - 25)) / ((double)68719476736.0);
+    KsTAtmp = (double)Fb * (TAdut - 25);
+    calcedGb = KsTAtmp / ((double)68719476736.0);
+    Alpha_corr = (((double)(Fa * POW10)) * Ha_customer * (double)(1 + calcedGa + calcedGb)) /
+                 ((double)70368744177664.0);
+    calcedFa = object / (emissivity * (Alpha_corr / POW10));
+
+    first_sqrt = sqrt(calcedFa + TaTr4);
 
     return sqrt(first_sqrt) - 273.15 - Hb_customer;
 }
@@ -344,6 +388,37 @@ double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
     for (i = 0; i < 5; ++i)
     {
         temp = mlx90632_calc_temp_object_iteration(temp, object, TAdut, Ga, Fa, Fb, Ha, Hb, tmp_emi);
+    }
+    return temp;
+}
+
+double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, double reflected,
+                                           int32_t Ea, int32_t Eb, int32_t Ga, int32_t Fa, int32_t Fb,
+                                           int16_t Ha, int16_t Hb)
+{
+    double kEa, kEb, TAdut;
+    double temp = 25.0;
+    double tmp_emi = mlx90632_get_emissivity();
+    double TaTr4;
+    double ta4;
+    int8_t i;
+
+    kEa = ((double)Ea) / ((double)65536.0);
+    kEb = ((double)Eb) / ((double)256.0);
+    TAdut = (((double)ambient) - kEb) / kEa + 25;
+
+    TaTr4 = reflected + 273.15;
+    TaTr4 = TaTr4 * TaTr4;
+    TaTr4 = TaTr4 * TaTr4;
+    ta4 = TAdut + 273.15;
+    ta4 = ta4 * ta4;
+    ta4 = ta4 * ta4;
+    TaTr4 = TaTr4 - (TaTr4 - ta4) / tmp_emi;
+
+    //iterate through calculations
+    for (i = 0; i < 5; ++i)
+    {
+        temp = mlx90632_calc_temp_object_iteration_reflected(temp, object, TAdut, TaTr4, Ga, Fa, Fb, Ha, Hb, tmp_emi);
     }
     return temp;
 }

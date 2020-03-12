@@ -58,6 +58,16 @@ double dspv5_object_helper(int16_t object_new_raw, int16_t object_old_raw, int16
     return mlx90632_calc_temp_object(object, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 }
 
+double dspv5_object_reflected_helper(int16_t object_new_raw, int16_t object_old_raw, int16_t ambient_new_raw, int16_t ambient_old_raw, double reflected)
+{
+    double object, ambient;
+
+    ambient = mlx90632_preprocess_temp_ambient(ambient_new_raw, ambient_old_raw, Gb);
+    object = mlx90632_preprocess_temp_object(object_new_raw, object_old_raw, ambient_new_raw, ambient_old_raw,
+                                             Ka);
+    return mlx90632_calc_temp_object_reflected(object, ambient, reflected, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+}
+
 double dspv5_ambient_helper(int16_t ambient_new_raw, int16_t ambient_old_raw)
 {
     return mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, P_T, P_R, P_G, P_O, Gb);
@@ -102,6 +112,14 @@ void test_dsp_object(void)
     TEST_ASSERT_DOUBLE_WITHIN(0.01, -16.653, dspv5_object_helper(-5000, -5000, 22454, 23030));
 }
 
+void test_dsp_object_reflected(void)
+{
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, dspv5_object_helper(609, 611, 22454, 23030), dspv5_object_reflected_helper(609, 611, 22454, 23030, 48.724));
+    mlx90632_set_emissivity(0.1);
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 98.141, dspv5_object_reflected_helper(609, 611, 22454, 23030, 49.66));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 143.956, dspv5_object_reflected_helper(609, 611, 22454, 23030, 40.00));
+}
+
 void test_set_get_emissivity(void)
 {
     double delta = 0.00001;
@@ -141,4 +159,3 @@ void test_dsp_object_Hb_change(void)
 
 
 ///@}
-

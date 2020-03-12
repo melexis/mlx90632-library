@@ -94,7 +94,7 @@ jobs:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-4.0
+            - 
           packages:
             - clang-4.0
       env:
@@ -105,11 +105,11 @@ jobs:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-5.0
+            - 
           packages:
             - clang-5.0
       env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
+        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"      
 # --- Style check stages ---
     - stage: style
       before_script: git clone https://github.com/uncrustify/uncrustify.git && cd uncrustify && mkdir build && cd build && cmake .. && sudo make install && cd ../..
@@ -185,7 +185,7 @@ jobs:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-4.0
+            - 
           packages:
             - clang-4.0
             - gcc-multilib
@@ -201,7 +201,7 @@ jobs:
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-5.0
+            - 
           packages:
             - clang-5.0
             - gcc-multilib
@@ -244,7 +244,7 @@ jobs:
         - git clone --branch=v1.13 https://github.com/linux-test-project/lcov.git && cd lcov && sudo make install && cd -
       script:
         - make coverage
-        - coveralls-lcov --repo-token ${COVERALLS_TOKEN} build/lcov.info
+        - coveralls-lcov --repo-token=${COVERALLS_TOKEN} build/lcov.info
       os: linux
       addons:
         apt:
