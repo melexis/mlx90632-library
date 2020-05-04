@@ -379,8 +379,9 @@ int32_t mlx90632_set_meas_type(uint8_t type);
  * @note the available types are defined as @link MLX90632_MTYP_MEDICAL @endlink
  * and @link MLX90632_MTYP_EXTENDED @endlink
  *
- * @retval 0 Successfully swithed the meausurement mode
- * @retval <0 Something went wrong. Check errno.h for more details
+ * @retval = @link MLX90632_MTYP_MEDICAL @endlink - medical range measurement type
+ * @retval = @link MLX90632_MTYP_EXTENDED @endlink - extended range measurement type
+ * @retval <0 Something went wrong. Consult errno.h for more details.
  */
 int32_t mlx90632_get_meas_type(void);
 
@@ -393,11 +394,9 @@ int32_t mlx90632_get_meas_type(void);
  * @note EEPROM version can have swapped high and low bytes due to CPU or I2C.
  * Please confirm that i2c read (16bit) is functioning as expected.
  *
- * @retval = @link MLX90632_MTYP_MEDICAL @endlink - medical range measurement type
- * @retval = @link MLX90632_MTYP_EXTENDED @endlink - extended range measurement type
+ * @retval 0 Successfully initialized MLX90632 driver
  * @retval <0 Something went wrong. Consult errno.h for more details.
  */
-
 int32_t mlx90632_init(void);
 
 /** Set emissivity which is retained in single variable.
