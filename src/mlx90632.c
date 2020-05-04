@@ -320,7 +320,7 @@ static double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32
  *                              input 25.0
  * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
  * @param[in] TAdut ambient temperature coefficient
- * @param[in] Tr reflected (environment) temperature from a sensor different than the MLX90632 or acquired by other means
+ * @param[in] TaTr4 compensation coefficient for reflected (environment) temperature
  * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
  * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
  * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
@@ -448,6 +448,11 @@ int32_t mlx90632_init(void)
     ret = mlx90632_i2c_write(MLX90632_REG_STATUS, reg_status & ~(MLX90632_STAT_DATA_RDY));
     if (ret < 0)
         return ret;
+
+    if ((eeprom_version & 0x7F00) != MLX90632_XTD_RNG_KEY)
+    {
+        return -ERANGE;
+    }
 
     return 0;
 }
