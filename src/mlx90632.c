@@ -451,7 +451,7 @@ int32_t mlx90632_init(void)
 
     if ((eeprom_version & 0x7F00) != MLX90632_XTD_RNG_KEY)
     {
-        return -ERANGE;
+        return ERANGE;
     }
 
     return 0;
