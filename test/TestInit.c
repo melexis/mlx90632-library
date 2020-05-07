@@ -94,7 +94,7 @@ void test_init_success(void)
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
 
     TEST_ASSERT_EQUAL_INT(ERANGE, mlx90632_init());
-    
+
     // test extended range
     eeprom_version_mock = 0x505;
 

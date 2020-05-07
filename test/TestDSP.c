@@ -74,7 +74,7 @@ double object_extended_helper(int16_t object_new_raw, int16_t ambient_new_raw, i
 
     ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw, ambient_old_raw, Gb);
     object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw, ambient_old_raw,
-                                             Ka);
+                                                      Ka);
     return mlx90632_calc_temp_object_extended(object, ambient, reflected, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 }
 
