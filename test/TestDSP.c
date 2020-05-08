@@ -30,6 +30,7 @@
 #include <math.h>
 
 #include "mlx90632.h"
+#include "mlx90632_extended_meas.h"
 
 #include "mock_mlx90632_depends.h"
 
