@@ -57,7 +57,7 @@ void test_init_success(void)
     // Reset EOC and NewData
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
 
-    TEST_ASSERT_EQUAL_INT(ERANGE, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
 
     // test also ID_CONSUMER
     eeprom_version_mock = 0x205;
@@ -75,7 +75,7 @@ void test_init_success(void)
     // Reset EOC and NewData
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
 
-    TEST_ASSERT_EQUAL_INT(ERANGE, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
 
     // test also another calibration id
     eeprom_version_mock = 0x305;
@@ -93,7 +93,7 @@ void test_init_success(void)
     // Reset EOC and NewData
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
 
-    TEST_ASSERT_EQUAL_INT(ERANGE, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
 
     // test extended range
     eeprom_version_mock = 0x505;
@@ -111,7 +111,7 @@ void test_init_success(void)
     // Reset EOC and NewData
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
 
-    TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
+    TEST_ASSERT_EQUAL_INT(ERANGE, mlx90632_init());
 }
 
 void test_init_wrong_eeprom_version(void)
