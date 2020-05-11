@@ -296,6 +296,17 @@ double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, doub
  */
 int32_t mlx90632_init(void);
 
+/** Trigger start measurement for mlx90632
+ *
+ * Trigger measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval >=0 Channel position where new (recently updated) measurement can be found
+ *
+ * @note This function is using usleep so it is blocking!
+ */
+int mlx90632_start_measurement(void);
+
 /** Set emissivity which is retained in single variable.
  *
  * @param[in] value Value provided by user of object emissivity. Defaults to 1.0 and cannot be 0.0.
