@@ -1,6 +1,5 @@
 /**
- * @file mlx90632.c
- * @brief MLX90632 driver with virtual i2c communication
+ * @Extended range measurements implementation for MLX90632 driver with virtual i2c communication
  * @internal
  *
  * @copyright (C) 2017 Melexis N.V.
@@ -42,54 +41,6 @@
 #define STATIC static
 #endif
 
-/** Trigger start measurement for mlx90632 extended range measurements
- *
- * Trigger measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
- *
- * @retval <0 Something failed. Check errno.h for more information
- * @retval >=0 Channel position where new (recently updated) measurement can be found
- *
- * @note This function is using usleep so it is blocking!
- */
-STATIC int mlx90632_start_measurement_extended(void)
-{
-    int ret, tries = 100;
-    uint16_t reg_status;
-
-    ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
-    if (ret < 0)
-        return ret;
-
-    ret = mlx90632_i2c_write(MLX90632_REG_STATUS, reg_status & (~MLX90632_STAT_DATA_RDY));
-    if (ret < 0)
-        return ret;
-
-    while (tries-- > 0)
-    {
-        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
-        if (ret < 0)
-            return ret;
-
-        ret = (reg_status & MLX90632_STAT_CYCLE_POS) >> 2;
-        if (reg_status & MLX90632_STAT_DATA_RDY & (ret == 19))
-            break;
-
-        /* minimum wait time to complete measurement
-         * should be calculated according to refresh rate
-         * atm 10ms - 11ms
-         */
-        usleep(10000, 11000);
-    }
-
-    if (tries < 0)
-    {
-        // data not ready
-        return -ETIMEDOUT;
-    }
-
-    return ret;
-}
-
 /** Read ambient raw old and new values for the extended range based on @link mlx90632_start_measurement @endlink return value.
  *
  * Two i2c_reads are needed to obtain necessary raw ambient values from the sensor, as they are then
@@ -118,7 +69,7 @@ STATIC int32_t mlx90632_read_temp_ambient_raw_extended(int16_t *ambient_new_raw,
     return ret;
 }
 
-/** Read object raw values for the extended range based on @link mlx90632_start_measurement_extended @endlink return value.
+/** Read object raw values for the extended range based on @link mlx90632_start_measurement @endlink return value.
  *
  * Six i2c_reads are needed to obtain necessary raw object values from the sensor. These values are grouped and then
  * averaged before return of the function. After that they are then preprocessed before going to
@@ -134,7 +85,7 @@ STATIC int32_t mlx90632_read_temp_object_raw_extended(int32_t start_measurement_
 {
     int32_t ret;
     uint16_t read_tmp;
-    double read;
+    int32_t read;
 
     ret = mlx90632_i2c_read(MLX90632_RAM_1(17), &read_tmp);
     if (ret < 0)
@@ -170,7 +121,12 @@ STATIC int32_t mlx90632_read_temp_object_raw_extended(int32_t start_measurement_
     if (ret < 0)
         return ret;
 
-    *object_new_raw = (int16_t)(read + (int16_t)read_tmp);
+    read = read + (int16_t)read_tmp;
+
+    if (read > 32767 || read < -32768)
+        return -EINVAL;
+
+    *object_new_raw = (int16_t)read;
 
     return ret;
 }
@@ -178,18 +134,31 @@ STATIC int32_t mlx90632_read_temp_object_raw_extended(int32_t start_measurement_
 int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw)
 {
     int32_t ret, start_measurement_ret;
+    int tries = 3;
 
     // trigger and wait for measurement to complete
-    start_measurement_ret = mlx90632_start_measurement_extended();
-    if (start_measurement_ret < 0)
-        return start_measurement_ret;
+    while (tries-- > 0)
+    {
+        start_measurement_ret = mlx90632_start_measurement();
+        if (start_measurement_ret < 0)
+            return start_measurement_ret;
+
+        if (start_measurement_ret == 19)
+            break;
+    }
+
+    if (tries < 0)
+    {
+        // data not ready
+        return -ETIMEDOUT;
+    }
 
     /** Read new and old **ambient** values from sensor */
     ret = mlx90632_read_temp_ambient_raw_extended(ambient_new_raw, ambient_old_raw);
     if (ret < 0)
         return ret;
 
-    /** Read new and old **object** values from sensor */
+    /** Read new **object** value from sensor */
     ret = mlx90632_read_temp_object_raw_extended(start_measurement_ret, object_new_raw);
 
     return ret;
@@ -221,10 +190,10 @@ double mlx90632_calc_temp_ambient_extended(int16_t ambient_new_raw, int16_t ambi
 {
     double Asub, Bsub, Ablock, Bblock, Cblock, AMB;
 
-    AMB = mlx90632_preprocess_temp_ambient(ambient_new_raw, ambient_old_raw, Gb);
+    AMB = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw, ambient_old_raw, Gb);
 
     Asub = ((double)P_T) / (double)17592186044416.0;
-    Bsub = (double)AMB - ((double)P_R / (double)256.0);
+    Bsub = AMB - ((double)P_R / (double)256.0);
     Ablock = Asub * (Bsub * Bsub);
     Bblock = (Bsub / (double)P_G) * (double)1048576.0;
     Cblock = (double)P_O / (double)256.0;
@@ -267,7 +236,7 @@ static double mlx90632_calc_temp_object_iteration_extended(double prev_object_te
     calcedGa = ((double)Ga * (prev_object_temp - 25)) / ((double)68719476736.0);
     KsTAtmp = (double)Fb * (TAdut - 25);
     calcedGb = KsTAtmp / ((double)68719476736.0);
-    Alpha_corr = (((double)(Fa * POW10)) * Ha_customer * (double)(1 + calcedGa + calcedGb)) /
+    Alpha_corr = (((double)(Fa * POW10)) * Ha_customer * (double)(1.0 + calcedGa + calcedGb)) /
                  ((double)70368744177664.0);
     calcedFa = object / (emissivity * (Alpha_corr / POW10));
 
@@ -304,6 +273,7 @@ double mlx90632_calc_temp_object_extended(int32_t object, int32_t ambient, doubl
     {
         temp = mlx90632_calc_temp_object_iteration_extended(temp, object, TAdut, TaTr4, Ga, Fa / 2, Fb, Ha, Hb, tmp_emi);
     }
+
     return temp;
 }
 
