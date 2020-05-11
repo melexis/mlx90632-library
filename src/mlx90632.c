@@ -44,16 +44,7 @@ static const char mlx90632version[] __attribute__((used)) = { VERSION };
 #define STATIC static
 #endif
 
-/** Trigger start measurement for mlx90632
- *
- * Trigger measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
- *
- * @retval <0 Something failed. Check errno.h for more information
- * @retval >=0 Channel position where new (recently updated) measurement can be found
- *
- * @note This function is using usleep so it is blocking!
- */
-STATIC int mlx90632_start_measurement(void)
+int mlx90632_start_measurement(void)
 {
     int ret, tries = 100;
     uint16_t reg_status;
