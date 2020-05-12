@@ -326,8 +326,6 @@ int mlx90632_start_measurement(void);
 int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw);
 int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
                                       int16_t *object_new_raw, int16_t *object_old_raw);
-int32_t mlx90632_read_temp_ambient_raw_extended(int16_t *ambient_new_raw, int16_t *ambient_old_raw)
-int32_t mlx90632_read_temp_object_raw_extended(int32_t start_measurement_ret, int16_t *object_new_raw)
 
 #endif
 
