@@ -539,7 +539,6 @@ void test_read_ambient_values_extended_success(void)
     TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_new_raw);
     TEST_ASSERT_EQUAL_INT16(ambient_old_mock, ambient_old_raw);
 }
-}
 
 /** Test error outputs when reading ambient values from sensor. */
 void test_read_ambient_values_extended_errors(void)
