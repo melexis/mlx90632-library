@@ -129,4 +129,10 @@ int32_t mlx90632_set_meas_type(uint8_t type);
  */
 int32_t mlx90632_get_meas_type(void);
 
+#ifdef TEST
+int32_t mlx90632_read_temp_ambient_raw_extended(int16_t *ambient_new_raw, int16_t *ambient_old_raw);
+int32_t mlx90632_read_temp_object_raw_extended(int32_t start_measurement_ret, int16_t *object_new_raw);
+
+#endif
+
 #endif
