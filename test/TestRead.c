@@ -536,7 +536,9 @@ void test_read_ambient_values_extended_success(void)
     TEST_ASSERT_EQUAL_INT(0, mlx90632_read_temp_ambient_raw_extended(&ambient_new_raw, &ambient_old_raw));
 
     // Confirm all values are as expected
-    TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_old_mock);
+    TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_new_raw);
+    TEST_ASSERT_EQUAL_INT16(ambient_old_mock, ambient_old_raw);
+}
 }
 
 /** Test error outputs when reading ambient values from sensor. */
