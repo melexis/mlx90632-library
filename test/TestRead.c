@@ -515,5 +515,50 @@ void test_read_object_error_ch(void)
     TEST_ASSERT_EQUAL_INT(-EINVAL, mlx90632_read_temp_object_raw(3, &object_new_raw, &object_old_raw));
 }
 
+/** Test reading ambient values from sensor in extended range measurements.
+ *
+ */
+void test_read_ambient_values_extended_success(void)
+{
+    int16_t ambient_new_mock = 22454;
+    int16_t ambient_old_mock = 23030;
+
+    // Read Ambient raw expectations (based on above cycle position)
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(17), (uint16_t*)&ambient_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(18), (uint16_t*)&ambient_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_old_mock);
+
+    // Trigger the read_temp_raw function
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_read_temp_object_raw_extended(&ambient_new_raw, &ambient_old_raw));
+
+    // Confirm all values are as expected
+    TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_old_mock);
+}
+
+/** Test error outputs when reading ambient values from sensor. */
+void test_read_ambient_values_extended_errors(void)
+{
+    int16_t ambient_new_mock = 22454;
+    int16_t ambient_old_mock = 23030;
+
+    // First read fails
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(1), (uint16_t*)&ambient_new_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_ambient_raw_extended(&ambient_new_raw, &ambient_old_raw));
+
+    // Second read fails
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(1), (uint16_t*)&ambient_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(2), (uint16_t*)&ambient_old_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_ambient_raw_extended(&ambient_new_raw, &ambient_old_raw));
+}
+
 ///@}
 
