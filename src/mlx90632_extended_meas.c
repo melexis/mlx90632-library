@@ -75,13 +75,12 @@ STATIC int32_t mlx90632_read_temp_ambient_raw_extended(int16_t *ambient_new_raw,
  * averaged before return of the function. After that they are then preprocessed before going to
  * calculation functions
  *
- * @param[in] start_measurement_ret Return value of @link mlx90632_start_measurement @endlink
  * @param[out] *object_new_raw Pointer to memory location where average of new object values from sensor is stored
  *
  * @retval 0 Successfully read values
  * @retval <0 Something went wrong. Check errno.h for more details.
  */
-STATIC int32_t mlx90632_read_temp_object_raw_extended(int32_t start_measurement_ret, int16_t *object_new_raw)
+STATIC int32_t mlx90632_read_temp_object_raw_extended(int16_t *object_new_raw)
 {
     int32_t ret;
     uint16_t read_tmp;
@@ -159,7 +158,7 @@ int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambie
         return ret;
 
     /** Read new **object** value from sensor */
-    ret = mlx90632_read_temp_object_raw_extended(start_measurement_ret, object_new_raw);
+    ret = mlx90632_read_temp_object_raw_extended(object_new_raw);
 
     return ret;
 }
