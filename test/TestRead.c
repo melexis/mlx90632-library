@@ -965,13 +965,6 @@ void test_read_temp_raw_extended_errors(void)
     uint16_t reg_status_mock2 = 0xC9; // cycle position 18 & data ready
     uint16_t reg_status_mock3 = 0xCF; // cycle position 19 & data ready
     int16_t ambient_new_mock = 22454;
-    int16_t ambient_old_mock = 23030;
-    int16_t object_mock_l1 = 250;
-    int16_t object_mock_l2 = 260;
-    int16_t object_mock_b1 = -25;
-    int16_t object_mock_b2 = -35;
-    int16_t object_mock_v1 = 4;
-    int16_t object_mock_v2 = -2;
 
     // 1st read returns an error
     //Start measurement expectations
@@ -1047,7 +1040,6 @@ void test_read_temp_raw_extended_errors(void)
 
 void test_set_meas_type_success(void)
 {
-    uint16_t reg_ctrl;
     uint16_t reg_ctrl_mock_med = 0xFE0F;
     uint16_t reg_ctrl_mock_med1 = 0xFE09;
     uint16_t reg_ctrl_mock_ext = 0xFF1F;
@@ -1090,7 +1082,6 @@ void test_set_meas_type_success(void)
 
 void test_set_meas_type_errors(void)
 {
-    uint16_t reg_ctrl;
     uint16_t reg_ctrl_mock_med = 0xFE0F;
     uint16_t reg_ctrl_mock_med1 = 0xFE09;
     uint16_t reg_ctrl_mock_ext = 0xFF1F;
@@ -1142,7 +1133,6 @@ void test_set_meas_type_errors(void)
 
 void test_get_meas_type_success(void)
 {
-    uint16_t reg_ctrl;
     uint16_t reg_ctrl_mock_med = 0xFE0F;
     uint16_t reg_ctrl_mock_ext = 0xFF1F;
 
@@ -1163,13 +1153,12 @@ void test_get_meas_type_success(void)
 
 void test_get_meas_type_errors(void)
 {
-    uint16_t reg_ctrl;
     uint16_t reg_ctrl_mock_inval = 0xFE9F;
 
     // Error reading the register
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_inval, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_inval);
 
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_get_meas_type());
 
