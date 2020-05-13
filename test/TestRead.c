@@ -1045,7 +1045,100 @@ void test_read_temp_raw_extended_errors(void)
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw));
 }
 
+void test_set_meas_type_success(void)
+{
+    uint16_t reg_ctrl;
+    uint16_t reg_ctrl_mock_med = 0xFE0F;
+    uint16_t reg_ctrl_mock_med1 = 0xFE09;
+    uint16_t reg_ctrl_mock_ext = 0xFF1F;
+    uint16_t reg_ctrl_mock_ext1 = 0xFF19;
 
+    // Switch from medical to extended measurement type
+    mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_ext1, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_ext1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_ext1);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_ext, 0);
+
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
+
+    // Switch from extended to medical measurement type
+    mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_med1, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med1);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_med, 0);
+
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_set_meas_type(MLX90632_MTYP_MEDICAL));
+}
+
+void test_set_meas_type_errors(void)
+{
+    uint16_t reg_ctrl;
+    uint16_t reg_ctrl_mock_med = 0xFE0F;
+    uint16_t reg_ctrl_mock_med1 = 0xFE09;
+    uint16_t reg_ctrl_mock_ext = 0xFF1F;
+    uint16_t reg_ctrl_mock_ext1 = 0xFF19;
+
+    // Invalid input parameter
+    TEST_ASSERT_EQUAL_INT(-EINVAL, mlx90632_set_meas_type(9));
+
+    // Addressed reset command error
+    mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, -EPERM);
+
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
+
+    // First read fail
+    mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
+
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
+
+    // First write fail
+    mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_ext1, -EPERM);
+
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
+
+    // Second read fail
+    mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_ext1, 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_ext1, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_ext1);
+
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
+}
 
 ///@}
 
