@@ -293,9 +293,8 @@ int32_t mlx90632_set_meas_type(uint8_t type)
     if (ret < 0)
         return ret;
 
-    // set the meas_select bits
-    reg_ctrl = reg_ctrl & 0xFE09;
-    reg_ctrl += (type << 4);
+    reg_ctrl = reg_ctrl & (~MLX90632_CFG_MTYP_MASK & ~MLX90632_CFG_PWR_MASK);
+    reg_ctrl |= (MLX90632_MTYP_STATUS(type) | MLX90632_PWR_STATUS_HALT);
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl);
     if (ret < 0)
@@ -305,8 +304,8 @@ int32_t mlx90632_set_meas_type(uint8_t type)
     if (ret < 0)
         return ret;
 
-    reg_ctrl = reg_ctrl & 0xFFF9;
-    reg_ctrl |= 0x0006;
+    reg_ctrl = reg_ctrl & ~MLX90632_CFG_PWR_MASK;
+    reg_ctrl |= MLX90632_PWR_STATUS_CONTINUOUS;
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl);
 
@@ -322,8 +321,7 @@ int32_t mlx90632_get_meas_type(void)
     if (ret < 0)
         return ret;
 
-    // read the meas_select bits
-    reg_ctrl = reg_ctrl & 0x01F0;
+    reg_ctrl = reg_ctrl & MLX90632_CFG_MTYP_MASK;
     reg_ctrl = reg_ctrl >> 4;
 
     if ((reg_ctrl != MLX90632_MTYP_MEDICAL) & (reg_ctrl != MLX90632_MTYP_EXTENDED))
