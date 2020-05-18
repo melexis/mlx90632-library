@@ -39,6 +39,7 @@
 
 /* Including CRC calculation functions */
 #include <errno.h>
+#include "mlx90632_extended_meas.h"
 
 /* Solve errno not defined values */
 #ifndef ETIMEDOUT
@@ -50,6 +51,13 @@
 #ifndef EPROTONOSUPPORT
 #define EPROTONOSUPPORT 93 /**< From linux errno.h */
 #endif
+#ifndef ERANGE
+#define ERANGE 34 /**< From linux errno.h */
+#endif
+#ifndef ENOKEY
+#define ENOKEY 126 /**< From linux errno.h */
+#endif
+
 
 /* BIT, GENMASK and ARRAY_SIZE macros are imported from kernel */
 #ifndef BIT
@@ -110,12 +118,17 @@
 #define   MLX90632_CFG_SOC_SHIFT 3 /**< Start measurement in step mode */
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
+#define   MLX90632_CFG_MTYP_MASK GENMASK(8, 4) /**< Meas select Mask */
 /* PowerModes statuses */
 #define MLX90632_PWR_STATUS(ctrl_val) (ctrl_val << 1)
 #define MLX90632_PWR_STATUS_HALT MLX90632_PWR_STATUS(0) /**< Pwrmode hold */
 #define MLX90632_PWR_STATUS_SLEEP_STEP MLX90632_PWR_STATUS(1) /**< Pwrmode sleep step*/
 #define MLX90632_PWR_STATUS_STEP MLX90632_PWR_STATUS(2) /**< Pwrmode step */
 #define MLX90632_PWR_STATUS_CONTINUOUS MLX90632_PWR_STATUS(3) /**< Pwrmode continuous*/
+/* Measurement type select*/
+#define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << 4)
+#define MLX90632_MTYP_STATUS_MEDICAL MLX90632_MTYP_STATUS(0) /**< Medical measurement type */
+#define MLX90632_MTYP_STATUS_EXTENDED MLX90632_MTYP_STATUS(17) /**< Extended measurement type*/
 
 /* Device status register - volatile */
 #define MLX90632_REG_STATUS 0x3fff /**< Device status register */
@@ -142,6 +155,12 @@
 #define MLX90632_EE_SEED    0x3f6d /**< Seed for the CRC calculations */
 #define MLX90632_REF_12 12.0 /**< ResCtrlRef value of Channel 1 or Channel 2 */
 #define MLX90632_REF_3  12.0 /**< ResCtrlRef value of Channel 3 */
+#define MLX90632_XTD_RNG_KEY 0x0500 /**Extended range support indication key */
+
+/* Measurement types */
+#define MLX90632_MTYP_MEDICAL 0
+#define MLX90632_MTYP_EXTENDED 17
+
 
 /** Read raw ambient and object temperature
  *
@@ -276,10 +295,22 @@ double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, doub
  * @note EEPROM version can have swapped high and low bytes due to CPU or I2C.
  * Please confirm that i2c read (16bit) is functioning as expected.
  *
- * @retval 0 Successfully initialized MLX90632 driver
+ * @retval 0 Successfully initialized MLX90632 driver, extended range measurement not supported
+ * @retval @link ERANGE @endlink Successfully initialized MLX90632 driver, extended range measurement is supported
  * @retval <0 Something went wrong. Consult errno.h for more details.
  */
 int32_t mlx90632_init(void);
+
+/** Trigger start measurement for mlx90632
+ *
+ * Trigger measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval >=0 Channel position where new (recently updated) measurement can be found
+ *
+ * @note This function is using usleep so it is blocking!
+ */
+int mlx90632_start_measurement(void);
 
 /** Set emissivity which is retained in single variable.
  *
@@ -296,10 +327,10 @@ double mlx90632_get_emissivity(void);
 ///@}
 
 #ifdef TEST
-int mlx90632_start_measurement(void);
 int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw);
 int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
                                       int16_t *object_new_raw, int16_t *object_old_raw);
+
 #endif
 
 #endif

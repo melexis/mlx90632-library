@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include "mlx90632.h"
+#include "mlx90632_extended_meas.h"
 
 #include "mock_mlx90632_depends.h"
 
@@ -94,6 +95,24 @@ void test_init_success(void)
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
 
     TEST_ASSERT_EQUAL_INT(0, mlx90632_init());
+
+    // test extended range
+    eeprom_version_mock = 0x505;
+
+    // Confirm EEPROM version
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_VERSION, &eeprom_version_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&eeprom_version_mock);
+
+    // Read REG_STATUS
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    // Reset EOC and NewData
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & ~0x01, 0);
+
+    TEST_ASSERT_EQUAL_INT(ERANGE, mlx90632_init());
 }
 
 void test_init_wrong_eeprom_version(void)

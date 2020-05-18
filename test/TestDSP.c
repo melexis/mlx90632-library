@@ -30,6 +30,7 @@
 #include <math.h>
 
 #include "mlx90632.h"
+#include "mlx90632_extended_meas.h"
 
 #include "mock_mlx90632_depends.h"
 
@@ -68,9 +69,24 @@ double dspv5_object_reflected_helper(int16_t object_new_raw, int16_t object_old_
     return mlx90632_calc_temp_object_reflected(object, ambient, reflected, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 }
 
+double object_extended_helper(int16_t object_new_raw, int16_t ambient_new_raw, int16_t ambient_old_raw, double reflected)
+{
+    double object, ambient;
+
+    ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw, ambient_old_raw, Gb);
+    object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw, ambient_old_raw,
+                                                      Ka);
+    return mlx90632_calc_temp_object_extended(object, ambient, reflected, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+}
+
 double dspv5_ambient_helper(int16_t ambient_new_raw, int16_t ambient_old_raw)
 {
     return mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw, P_T, P_R, P_G, P_O, Gb);
+}
+
+double ambient_extended_helper(int16_t ambient_new_raw, int16_t ambient_old_raw)
+{
+    return mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw, P_T, P_R, P_G, P_O, Gb);
 }
 
 void setUp(void)
@@ -86,6 +102,13 @@ void test_dsp_preprocess_ambient(void)
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 24385.9, mlx90632_preprocess_temp_ambient(32767, 32766, Gb));
 }
 
+void test_dsp_preprocess_ambient_extended(void)
+{
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 24041.27, mlx90632_preprocess_temp_ambient_extended(22454, 23030, Gb));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 19065.018, mlx90632_preprocess_temp_ambient_extended(100, 150, Gb));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 24385.9, mlx90632_preprocess_temp_ambient_extended(32767, 32766, Gb));
+}
+
 void test_dsp_preprocess_object(void)
 {
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 3314.89, mlx90632_preprocess_temp_object(3237, 3239, 22454, 23030, Ka));
@@ -95,12 +118,27 @@ void test_dsp_preprocess_object(void)
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 33545.08, mlx90632_preprocess_temp_object(32767, 32767, 22454, 23030, Ka));
 }
 
+void test_dsp_preprocess_object_extended(void)
+{
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 3314.89, mlx90632_preprocess_temp_object_extended(3238, 22454, 23030, Ka));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 153.562, mlx90632_preprocess_temp_object_extended(150, 22454, 23030, Ka));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, -153.562, mlx90632_preprocess_temp_object_extended(-150, 22454, 23030, Ka));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, -33545.08, mlx90632_preprocess_temp_object_extended(-32767, 22454, 23030, Ka));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 33545.08, mlx90632_preprocess_temp_object_extended(32767, 22454, 23030, Ka));
+}
 
 void test_dsp_ambient(void)
 {
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 48.724, dspv5_ambient_helper(22454, 23030));
     TEST_ASSERT_DOUBLE_WITHIN(0.01, -18.734, dspv5_ambient_helper(100, 150));
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 53.350, dspv5_ambient_helper(32767, 32766));
+}
+
+void test_dsp_ambient_extended(void)
+{
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 48.724, ambient_extended_helper(22454, 23030));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, -18.734, ambient_extended_helper(100, 150));
+    TEST_ASSERT_DOUBLE_WITHIN(0.01, 53.350, ambient_extended_helper(32767, 32766));
 }
 
 void test_dsp_object(void)
@@ -118,6 +156,18 @@ void test_dsp_object_reflected(void)
     mlx90632_set_emissivity(0.1);
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 98.141, dspv5_object_reflected_helper(609, 611, 22454, 23030, 49.66));
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 143.956, dspv5_object_reflected_helper(609, 611, 22454, 23030, 40.00));
+}
+
+void test_dsp_object_extended(void)
+{
+    TEST_ASSERT_DOUBLE_WITHIN(0.02, 55.507, object_extended_helper(305, 22454, 23030, 25.0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.02, 51.123, object_extended_helper(75, 22454, 23030, 25.0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.02, 48.171, object_extended_helper(-75, 22454, 23030, 25.0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.02, 292.381, object_extended_helper(32767, 22454, 23030, 25.0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.02, -16.653, object_extended_helper(-2500, 22454, 23030, 25.0));
+    mlx90632_set_emissivity(0.1);
+    TEST_ASSERT_DOUBLE_WITHIN(0.02, 98.141, object_extended_helper(305, 22454, 23030, 49.66));
+    TEST_ASSERT_DOUBLE_WITHIN(0.02, 143.956, object_extended_helper(305, 22454, 23030, 40.00));
 }
 
 void test_set_get_emissivity(void)
