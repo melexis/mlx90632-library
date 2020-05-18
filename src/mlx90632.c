@@ -311,7 +311,9 @@ static double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32
  *                              input 25.0
  * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
  * @param[in] TAdut ambient temperature coefficient
- * @param[in] TaTr4 compensation coefficient for reflected (environment) temperature
+ * @param[in] TaTr4 compensation coefficient for reflected (environment) temperature. The compensation 
+                       coefficient is calculated from ambient temperature either from a sensor different than the MLX90632 or
+                       acquired by other means.
  * @param[in] Ga Register value on @link MLX90632_EE_Ga @endlink
  * @param[in] Fa Register value on @link MLX90632_EE_Fa @endlink
  * @param[in] Fb Register value on @link MLX90632_EE_Fb @endlink
