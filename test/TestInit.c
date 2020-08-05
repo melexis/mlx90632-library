@@ -35,7 +35,11 @@
 
 #include "mock_mlx90632_depends.h"
 
-void SetUp(void)
+void setUp(void)
+{
+}
+
+void tearDown(void)
 {
 }
 

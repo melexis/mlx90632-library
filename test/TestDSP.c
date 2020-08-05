@@ -95,6 +95,10 @@ void setUp(void)
     mlx90632_set_emissivity(1.0);
 }
 
+void tearDown(void)
+{
+}
+
 void test_dsp_preprocess_ambient(void)
 {
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 24041.27, mlx90632_preprocess_temp_ambient(22454, 23030, Gb));
