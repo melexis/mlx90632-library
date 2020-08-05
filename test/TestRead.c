@@ -41,12 +41,16 @@ int16_t ambient_old_raw = 0;
 int16_t object_new_raw = 0;
 int16_t object_old_raw = 0;
 
-void SetUp(void)
+void setUp(void)
 {
     ambient_new_raw = 0;
     ambient_old_raw = 0;
     object_new_raw = 0;
     object_old_raw = 0;
+}
+
+void tearDown(void)
+{
 }
 
 /** Test start measurement with data ready.
