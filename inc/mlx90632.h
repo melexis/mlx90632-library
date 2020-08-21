@@ -110,6 +110,9 @@
 #define MLX90632_EE_Ha      0x2481 /**< Ha customer calibration value register 16bit */
 #define MLX90632_EE_Hb      0x2482 /**< Hb customer calibration value register 16bit */
 
+#define MLX90632_EE_MEAS_1      0x24E1 /**< Measurement settings 1 */
+#define MLX90632_EE_MEAS_2      0x24E2 /**< Measurement settings 2 */
+
 /* Register addresses - volatile */
 #define MLX90632_REG_I2C_ADDR   0x3000 /**< Chip I2C address register */
 
@@ -161,6 +164,19 @@
 #define MLX90632_MTYP_MEDICAL 0
 #define MLX90632_MTYP_EXTENDED 17
 
+/* Refresh rates */
+typedef enum MLX90632_MEAS
+{
+    MLX90632_MEAS_HZ_ERROR  = -1,
+    MLX90632_MEAS_HZ_HALF   = 0,
+    MLX90632_MEAS_HZ_1 = 1,
+    MLX90632_MEAS_HZ_2 = 2,
+    MLX90632_MEAS_HZ_4 = 3,
+    MLX90632_MEAS_HZ_8 = 4,
+    MLX90632_MEAS_HZ_16 = 5,
+    MLX90632_MEAS_HZ_32 = 6,
+    MLX90632_MEAS_HZ_64 = 7,
+} MLX90632_MEAS;
 
 /** Read raw ambient and object temperature
  *
@@ -323,6 +339,21 @@ void mlx90632_set_emissivity(double value);
 /** Read value of emissivity
  */
 double mlx90632_get_emissivity(void);
+
+/** Sets the refresh rate of the sensor using the MLX90632_EE_MEAS_1 and MLX90632_EE_MEAS_2 registers
+ *
+ * @param[in] MLX90632_MEAS enum refresh rate to set
+ *
+ * @retval <0 Something went wrong. Consult errno.h for more details.
+ */
+int32_t mlx90632_set_refreshRate(MLX90632_MEAS measRate);
+
+/** Gets the value in MLX90632_EE_MEAS_1 and converts it to the appropriate MLX90632_MEAS enum
+ *
+ * @retval MLX90632_MEAS_HZ_ERROR if there is an error
+ * @retval refresh rate as the MLX90632_MEAS enum
+ */
+MLX90632_MEAS mlx90632_get_refreshRate(void);
 
 ///@}
 
