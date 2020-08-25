@@ -450,63 +450,67 @@ int32_t mlx90632_init(void)
     return 0;
 }
 
-static int32_t unlockEEProm ()
+static int32_t unlockEEProm()
 {
-    return mlx90632_i2c_write (0x3005, 0x554C);
+    return mlx90632_i2c_write(0x3005, 0x554C);
 }
 
-static int32_t waitForEEPROMNotBusy ()
+static int32_t waitForEEPROMNotBusy()
 {
     uint16_t reg_status;
     int32_t ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
+
     while (ret >= 0 && reg_status & MLX90632_STAT_EE_BUSY)
     {
         ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
     }
-	
-	return ret;
-}
 
-static int32_t writeEEPROM_withoutErasing (uint16_t address, uint16_t data)
-{
-    int32_t ret = unlockEEProm ();
-    if (ret < 0)
-        return ret;
-    ret = mlx90632_i2c_write (address, data);
-    if (ret < 0)
-        return ret;
-    ret = waitForEEPROMNotBusy ();
-    
     return ret;
 }
 
-static int32_t writeEEPROM (uint16_t address, uint16_t data)
+static int32_t writeEEPROM_withoutErasing(uint16_t address, uint16_t data)
 {
-    int32_t ret = writeEEPROM_withoutErasing (address, 0x00);
+    int32_t ret = unlockEEProm();
+
     if (ret < 0)
         return ret;
-    ret = writeEEPROM_withoutErasing (address, data);
-    
+    ret = mlx90632_i2c_write(address, data);
+    if (ret < 0)
+        return ret;
+    ret = waitForEEPROMNotBusy();
+
+    return ret;
+}
+
+static int32_t writeEEPROM(uint16_t address, uint16_t data)
+{
+    int32_t ret = writeEEPROM_withoutErasing(address, 0x00);
+
+    if (ret < 0)
+        return ret;
+    ret = writeEEPROM_withoutErasing(address, data);
+
     return ret;
 }
 
 int32_t mlx90632_set_refreshRate(MLX90632_MEAS measRate)
 {
     uint16_t meas1, meas2;
-    
+
     int32_t ret = mlx90632_i2c_read(MLX90632_EE_MEAS_1, &meas1);
+
     if (ret < 0)
         return ret;
-    
-    ret = writeEEPROM (MLX90632_EE_MEAS_1, (meas1 & 0xF8FF) | (measRate << 8));
+
+    ret = writeEEPROM(MLX90632_EE_MEAS_1, (meas1 & 0xF8FF) | (measRate << 8));
     if (ret < 0)
         return ret;
-    
+
     ret = mlx90632_i2c_read(MLX90632_EE_MEAS_2, &meas2);
     if (ret < 0)
         return ret;
     ret = writeEEPROM(MLX90632_EE_MEAS_2, (meas2 & 0xF8FF) | (measRate << 8));
-    
+
     return ret;
 }
 
@@ -514,11 +518,12 @@ MLX90632_MEAS mlx90632_get_refreshRate(void)
 {
     int32_t ret;
     uint16_t meas1;
+
     ret = mlx90632_i2c_read(MLX90632_EE_MEAS_1, &meas1);
     if (ret < 0)
-		return MLX90632_MEAS_HZ_ERROR;
-	
-	return (meas1 & 0x0700) >> 8;
+        return MLX90632_MEAS_HZ_ERROR;
+
+    return (meas1 & 0x0700) >> 8;
 }
 
 ///@}
