@@ -1337,6 +1337,7 @@ void test_set_meas_type_success(void)
 
     // Switch from medical to extended measurement type
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+    usleep_Expect(150, 200);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1354,6 +1355,7 @@ void test_set_meas_type_success(void)
 
     // Switch from extended to medical measurement type
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+    usleep_Expect(150, 200);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1371,6 +1373,7 @@ void test_set_meas_type_success(void)
 
     // Switch from medical to sleeping step medical measurement type
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+    usleep_Expect(150, 200);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1388,6 +1391,7 @@ void test_set_meas_type_success(void)
 
     // Switch from medical sleeping step to extended sleeping step measurement type
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+    usleep_Expect(150, 200);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1416,11 +1420,13 @@ void test_set_meas_type_errors(void)
 
     // Addressed reset command error
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, -EPERM);
+    usleep_Expect(150, 200);
 
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
 
     // First read fail
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+    usleep_Expect(150, 200);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1430,6 +1436,7 @@ void test_set_meas_type_errors(void)
 
     // First write fail
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+    usleep_Expect(150, 200);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1441,6 +1448,7 @@ void test_set_meas_type_errors(void)
 
     // Second read fail
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, 0);
+    usleep_Expect(150, 200);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock_med, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
