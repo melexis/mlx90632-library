@@ -216,6 +216,28 @@ int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_ra
     return ret;
 }
 
+int32_t mlx90632_read_temp_raw_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
+                                     int16_t *object_new_raw, int16_t *object_old_raw)
+{
+    int32_t ret, start_measurement_ret;
+
+    // trigger and wait for measurement to complete
+    start_measurement_ret = mlx90632_start_measurement_burst();
+    if (start_measurement_ret < 0)
+        return start_measurement_ret;
+
+    /** Read new and old **ambient** values from sensor */
+    ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw);
+    if (ret < 0)
+        return ret;
+
+    /** Read new and old **object** values from sensor */
+    ret = mlx90632_read_temp_object_raw(2, object_new_raw, object_old_raw);
+
+    return ret;
+}
+
+
 /* DSPv5 */
 double mlx90632_preprocess_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_raw, int16_t Gb)
 {
@@ -445,6 +467,45 @@ int32_t mlx90632_init(void)
     if ((eeprom_version & 0x7F00) == MLX90632_XTD_RNG_KEY)
     {
         return ERANGE;
+    }
+
+    return 0;
+}
+
+int32_t mlx90632_start_measurement_burst(void)
+{
+    int32_t ret;
+    int tries = 150;
+    uint16_t reg;
+
+    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
+    if (ret < 0)
+        return ret;
+
+    reg |= MLX90632_CFG_SOB_MASK;
+
+    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg);
+    if (ret < 0)
+        return ret;
+
+    while (tries-- > 0)
+    {
+        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg);
+        if (ret < 0)
+            return ret;
+        if ((reg & MLX90632_STAT_BUSY) == 0)
+            break;
+        /* minimum wait time to complete measurement
+         * should be calculated according to refresh rate
+         * atm 10ms - 11ms
+         */
+        usleep(10000, 11000);
+    }
+
+    if (tries < 0)
+    {
+        // data not ready
+        return -ETIMEDOUT;
     }
 
     return 0;
