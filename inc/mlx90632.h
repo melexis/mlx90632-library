@@ -119,6 +119,8 @@
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
 #define   MLX90632_CFG_MTYP_MASK GENMASK(8, 4) /**< Meas select Mask */
+#define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode *//**< Start measurement in step mode */
+#define   MLX90632_CFG_SOB_MASK BIT(MLX90632_CFG_SOB_SHIFT)
 /* PowerModes statuses */
 #define MLX90632_PWR_STATUS(ctrl_val) (ctrl_val << 1)
 #define MLX90632_PWR_STATUS_HALT MLX90632_PWR_STATUS(0) /**< Pwrmode hold */
@@ -160,6 +162,8 @@
 /* Measurement types */
 #define MLX90632_MTYP_MEDICAL 0
 #define MLX90632_MTYP_EXTENDED 17
+#define MLX90632_MTYP_MEDICAL_BURST 128
+#define MLX90632_MTYP_EXTENDED_BURST 145
 
 
 /** Read raw ambient and object temperature
@@ -180,6 +184,26 @@
  */
 int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
                                int16_t *object_new_raw, int16_t *object_old_raw);
+
+/** Read raw ambient and object temperature in sleeping step mode
+ *
+ * Trigger and read raw ambient and object temperatures. This values still need
+ * to be pre-processed via @link mlx90632_preprocess_temp_ambient @endlink and @link
+ * mlx90632_preprocess_temp_object @endlink functions and then processed via @link
+ * mlx90632_calc_temp_ambient @endlink and @link mlx90632_calc_temp_object @endlink
+ * to retrieve values in milliCelsius
+ *
+ * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
+ * @param[out] object_new_raw Pointer to where new raw object temperature is written
+ * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
+ * @param[out] object_old_raw Pointer to where old raw object temperature is written
+ *
+ * @retval 0 Successfully read both temperatures
+ * @retval <0 Something went wrong. Check errno.h for more details
+ */
+
+int32_t mlx90632_read_temp_raw_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
+                                     int16_t *object_new_raw, int16_t *object_old_raw);
 
 /** Calculation of raw ambient output
  *
@@ -323,6 +347,17 @@ void mlx90632_set_emissivity(double value);
 /** Read value of emissivity
  */
 double mlx90632_get_emissivity(void);
+
+/** Trigger start of burst measurement for mlx90632
+ *
+ * Trigger a single measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval =0 New data is available and waiting to be processed
+ *
+ * @note This function is using usleep so it is blocking!
+ */
+int32_t mlx90632_start_measurement_burst(void);
 
 ///@}
 
