@@ -1304,9 +1304,12 @@ void test_read_temp_raw_burst_errors(void)
     uint16_t reg_status_mock = 0x010B;  // cycle position 2 & data ready & device is not busy
     int16_t ambient_new_mock = 22454;
 
-    // Start measurement expectations
+    // 1st read returns an error
+    //Start measurement expectations
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock);
+
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_raw(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
 
     // Start measurement expectations
