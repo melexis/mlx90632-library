@@ -1420,7 +1420,6 @@ void test_set_meas_type_errors(void)
 
     // Addressed reset command error
     mlx90632_i2c_write_ExpectAndReturn(0x3005, MLX90632_RESET_CMD, -EPERM);
-    usleep_Expect(150, 200);
 
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
 
