@@ -1289,7 +1289,7 @@ void test_read_temp_raw_burst_success(void)
     mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_old_mock);
 
     // Trigger the read_temp_raw function
-    TEST_ASSERT_EQUAL_INT(0, mlx90632_read_temp_raw(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
+    TEST_ASSERT_EQUAL_INT(0, mlx90632_read_temp_raw_burst(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
 
     // Confirm all values are as expected
     TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_new_raw);
@@ -1326,7 +1326,7 @@ void test_read_temp_raw_burst_errors(void)
     // Read Ambient raw expectations (based on above cycle position)
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(1), (uint16_t*)&ambient_new_mock, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_raw(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
+    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_raw_burst(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
 }
 
 void test_set_meas_type_success(void)
