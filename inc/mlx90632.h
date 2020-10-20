@@ -66,7 +66,7 @@
 #ifndef GENMASK
 #ifndef BITS_PER_LONG
 #warning "Using default BITS_PER_LONG value"
-#define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
+#define BITS_PER_LONG 32 /**< Define how many bits per long your CPU has */
 #endif
 #define GENMASK(h, l) \
     (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
@@ -110,6 +110,14 @@
 #define MLX90632_EE_Ha      0x2481 /**< Ha customer calibration value register 16bit */
 #define MLX90632_EE_Hb      0x2482 /**< Hb customer calibration value register 16bit */
 
+#define MLX90632_EE_MEDICAL_MEAS1      0x24E1 /**< Medical measurement 1 16bit */
+#define MLX90632_EE_MEDICAL_MEAS2      0x24E2 /**< Medical measurement 2 16bit */
+#define MLX90632_EE_EXTENDED_MEAS1     0x24F1 /**< Extended measurement 1 16bit */
+#define MLX90632_EE_EXTENDED_MEAS2     0x24F2 /**< Extended measurement 2 16bit */
+#define MLX90632_EE_EXTENDED_MEAS3     0x24F3 /**< Extended measurement 3 16bit */
+
+#define MLX90632_EE_REFRESH_RATE_MASK GENMASK(10, 8) /**< Refresh Rate Mask */
+
 /* Register addresses - volatile */
 #define MLX90632_REG_I2C_ADDR   0x3000 /**< Chip I2C address register */
 
@@ -119,14 +127,18 @@
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
 #define   MLX90632_CFG_MTYP_MASK GENMASK(8, 4) /**< Meas select Mask */
-#define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode *//**< Start measurement in step mode */
+#define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode */
 #define   MLX90632_CFG_SOB_MASK BIT(MLX90632_CFG_SOB_SHIFT)
+#define   MLX90632_SOB_CFG(ctrl_val) (ctrl_val << MLX90632_CFG_SOB_SHIFT)
+#define   MLX90632_START_BURST_MEAS MLX90632_SOB_CFG(1)
+#define   MLX90632_BURST_MEAS_NOT_PENDING MLX90632_SOB_CFG(0)
 /* PowerModes statuses */
 #define MLX90632_PWR_STATUS(ctrl_val) (ctrl_val << 1)
 #define MLX90632_PWR_STATUS_HALT MLX90632_PWR_STATUS(0) /**< Pwrmode hold */
 #define MLX90632_PWR_STATUS_SLEEP_STEP MLX90632_PWR_STATUS(1) /**< Pwrmode sleep step*/
 #define MLX90632_PWR_STATUS_STEP MLX90632_PWR_STATUS(2) /**< Pwrmode step */
 #define MLX90632_PWR_STATUS_CONTINUOUS MLX90632_PWR_STATUS(3) /**< Pwrmode continuous*/
+#define GET_PWR_STATUS(reg_value) reg_value & MLX90632_CFG_PWR_MASK /**<Gets the power status bits*/
 /* Measurement type select*/
 #define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << 4)
 #define MLX90632_MTYP_STATUS_MEDICAL MLX90632_MTYP_STATUS(0) /**< Medical measurement type */
@@ -159,12 +171,14 @@
 #define MLX90632_REF_3  12.0 /**< ResCtrlRef value of Channel 3 */
 #define MLX90632_XTD_RNG_KEY 0x0500 /**Extended range support indication key */
 
-/* Measurement types */
-#define MLX90632_MTYP_MEDICAL 0
-#define MLX90632_MTYP_EXTENDED 17
-#define MLX90632_MTYP_MEDICAL_BURST 128
-#define MLX90632_MTYP_EXTENDED_BURST 145
+/* Measurement types - the MSBit is for software purposes only and has no hardware bit related to it. It indicates continious '0' or sleeping step burst - '1' measurement mode*/
+#define MLX90632_MTYP_MEDICAL 0x00
+#define MLX90632_MTYP_EXTENDED 0x11
+#define MLX90632_MTYP_MEDICAL_BURST 0x80
+#define MLX90632_MTYP_EXTENDED_BURST 0x91
+#define MLX90632_BURST_MEASUREMENT_TYPE(meas_type) meas_type + 0x80 /**<The MSBit is only used in the software to indicate burst type measurement. The 5 LS Bits define medical ot extended measurement and are used to set the hardware*/
 
+#define MLX90632_MEAS_MAX_TIME 2000
 
 /** Read raw ambient and object temperature
  *
@@ -201,7 +215,6 @@ int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_ra
  * @retval 0 Successfully read both temperatures
  * @retval <0 Something went wrong. Check errno.h for more details
  */
-
 int32_t mlx90632_read_temp_raw_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
                                      int16_t *object_new_raw, int16_t *object_old_raw);
 
@@ -351,6 +364,8 @@ double mlx90632_get_emissivity(void);
 /** Trigger start of burst measurement for mlx90632
  *
  * Trigger a single measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
+ * The SOB bit is set so that the complete measurement table is re-freshed.
+ * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurment has started.
  *
  * @retval <0 Something failed. Check errno.h for more information
  * @retval =0 New data is available and waiting to be processed
@@ -359,6 +374,17 @@ double mlx90632_get_emissivity(void);
  */
 int32_t mlx90632_start_measurement_burst(void);
 
+/** mlx90632 i2c addressed reset
+ *
+ * Send a reset command through i2c to a mlx90632 device with a specified slave address.
+ * It also waits for at least 150us to ensure the mlx90632 device is properly reset and ready for further communications.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval =0 The mlx90632 device is propely reset and ready for communication.
+ *
+ * @note This function is using usleep so it is blocking!
+ */
+int32_t mlx90632_addressed_reset(void);
 ///@}
 
 #ifdef TEST
