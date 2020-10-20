@@ -305,18 +305,16 @@ int32_t mlx90632_set_meas_type(uint8_t type)
     if ((type != MLX90632_MTYP_MEDICAL) & (type != MLX90632_MTYP_EXTENDED) & (type != MLX90632_MTYP_MEDICAL_BURST) & (type != MLX90632_MTYP_EXTENDED_BURST))
         return -EINVAL;
 
-    ret = mlx90632_i2c_write(0x3005, MLX90632_RESET_CMD);
+    ret = mlx90632_addressed_reset();
     if (ret < 0)
         return ret;
 
-    usleep(150, 200);
     ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg_ctrl);
-
     if (ret < 0)
         return ret;
 
     reg_ctrl = reg_ctrl & (~MLX90632_CFG_MTYP_MASK & ~MLX90632_CFG_PWR_MASK);
-    reg_ctrl |= (MLX90632_MTYP_STATUS((type & 0x7F)) | MLX90632_PWR_STATUS_HALT);
+    reg_ctrl |= (MLX90632_MTYP_STATUS((type & 0x7F)) | MLX90632_PWR_STATUS_HALT);   //mask out the MSBit only used in the software to indicate burst mode
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl);
     if (ret < 0)
@@ -327,7 +325,7 @@ int32_t mlx90632_set_meas_type(uint8_t type)
         return ret;
 
     reg_ctrl = reg_ctrl & ~MLX90632_CFG_PWR_MASK;
-    if (type & 0x80)
+    if (type & 0x80)                                      //Check the MSBit that is used only in software to indicate burst mode
     {
         reg_ctrl |= MLX90632_PWR_STATUS_SLEEP_STEP;
     }
@@ -357,10 +355,10 @@ int32_t mlx90632_get_meas_type(void)
     if ((reg_ctrl != MLX90632_MTYP_MEDICAL) & (reg_ctrl != MLX90632_MTYP_EXTENDED))
         return -EINVAL;
 
-    reg_temp = reg_temp & MLX90632_CFG_PWR_MASK;
+    reg_temp = GET_PWR_STATUS(reg_temp);
 
     if (reg_temp == MLX90632_PWR_STATUS_SLEEP_STEP)
-        return reg_ctrl + 128;
+        return MLX90632_BURST_MEASUREMENT_TYPE(reg_ctrl);
 
     if (reg_temp != MLX90632_PWR_STATUS_CONTINUOUS)
         return -EINVAL;

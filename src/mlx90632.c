@@ -472,21 +472,122 @@ int32_t mlx90632_init(void)
     return 0;
 }
 
+int32_t mlx90632_addressed_reset(void)
+{
+    int32_t ret;
+
+    ret = mlx90632_i2c_write(0x3005, MLX90632_RESET_CMD);
+    if (ret < 0)
+        return ret;
+
+    usleep(150, 200);
+
+    return 0;
+}
+
+
+/** Reads the refresh rate and calculates the time needed for a single measurment from the EEPROM settings.
+ *
+ * @param[in] meas Measurement to read the frefresh rate for
+ *
+ * @retval >= Refresh time in ms
+ * @retval <0 Something went wrong. Check errno.h for more details.
+ */
+static int mlx90632_get_measurement_time(uint16_t meas)
+{
+    int32_t ret;
+    uint16_t reg;
+
+    ret = mlx90632_i2c_read(meas, &reg);
+    if (ret < 0)
+        return ret;
+
+    reg &= MLX90632_EE_REFRESH_RATE_MASK;
+    reg = reg >> 8;
+
+    return MLX90632_MEAS_MAX_TIME >> reg;
+}
+
+/** Reads the refresh rate and calculates the time needed for a whole measurment table from the EEPROM settings.
+ *
+ * The function is returning valid measurement time only for burst mode measurements.
+ * An error will be returned if it is called with a continuous measurement type parameter.
+ *
+ * @param[in] burst_meas_type Measurement type to read the frefresh rate for
+ *
+ * @retval >= Refresh time in ms
+ * @retval <0 Something went wrong. Check errno.h for more details.
+ */
+static int mlx90632_calculate_dataset_ready_time(void)
+{
+    int32_t ret;
+    int refresh_time;
+
+    ret = mlx90632_get_meas_type();
+    if (ret < 0)
+        return ret;
+
+    if ((ret != MLX90632_MTYP_MEDICAL_BURST) && (ret != MLX90632_MTYP_EXTENDED_BURST))
+        return -EINVAL;
+
+    if (ret == MLX90632_MTYP_MEDICAL_BURST)
+    {
+        ret = mlx90632_get_measurement_time(MLX90632_EE_MEDICAL_MEAS1);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = ret;
+
+        ret = mlx90632_get_measurement_time(MLX90632_EE_MEDICAL_MEAS2);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = refresh_time + ret;
+    }
+    else
+    {
+        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS1);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = ret;
+
+        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS2);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = refresh_time + ret;
+
+        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS3);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = refresh_time + ret;
+    }
+
+    return refresh_time;
+}
+
 int32_t mlx90632_start_measurement_burst(void)
 {
     int32_t ret;
-    int tries = 150;
+    int tries = 100;
     uint16_t reg;
 
     ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
     if (ret < 0)
         return ret;
 
-    reg |= MLX90632_CFG_SOB_MASK;
+    reg |= MLX90632_START_BURST_MEAS;
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg);
     if (ret < 0)
         return ret;
+
+    ret = mlx90632_calculate_dataset_ready_time();
+    if (ret < 0)
+        return ret;
+    msleep(ret);
 
     while (tries-- > 0)
     {
@@ -510,4 +611,5 @@ int32_t mlx90632_start_measurement_burst(void)
 
     return 0;
 }
+
 ///@}
