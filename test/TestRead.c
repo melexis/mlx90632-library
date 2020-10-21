@@ -1239,7 +1239,7 @@ void test_read_temp_raw_extended_burst_success(void)
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
     mlx90632_i2c_read_ReturnThruPtr_value(&meas3_mock);
 
-    msleep_Expect(1000);
+    msleep_Expect(750);
 
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1467,6 +1467,83 @@ void test_read_temp_raw_burst_errors(void)
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(1), (uint16_t*)&ambient_new_mock, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_raw_burst(&ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
+}
+
+void test_calculate_dataset_ready_time_success(void)
+{
+    uint16_t reg_ctrl_medb_mock = 0x0002; // ctrl_reg value medical sleeping step meas selected
+    uint16_t reg_ctrl_extb_mock = 0x0112; // ctrl_reg value extended sleeping step meas selected
+    uint16_t reg_status_med_mock = 0x010B;  // cycle position 2 & data ready & device is not busy
+    uint16_t reg_status_ext_mock = 0x01CF;  // cycle position 19 & data ready & device is not busy
+    uint16_t med_meas1_mock = 0x800D;
+    uint16_t med_meas2_mock = 0x801D;
+    uint16_t ext_meas1_mock = 0x8000;
+    uint16_t ext_meas2_mock = 0x8012;
+    uint16_t ext_meas3_mock = 0x800C;
+    uint16_t refresh_rate[8] = { 0x0000, 0x0100, 0x0200, 0x0300, 0x0400, 0x0500, 0x0600, 0x0700 };
+    int med_waiting_time[8] = { 4000, 2000, 1000, 500, 250, 124, 62, 30 };
+    int ext_waiting_time[8] = { 6000, 3000, 1500, 750, 375, 186, 93, 45 };
+
+    int i;
+
+    for (i = 0; i < 8; i++)
+    {
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_medb_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_medb_mock);
+
+        mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_medb_mock | MLX90632_START_BURST_MEAS, 0);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_medb_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_medb_mock);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_MEDICAL_MEAS1, &med_meas1_mock | refresh_rate[i], 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&med_meas1_mock);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_MEDICAL_MEAS2, &med_meas2_mock | refresh_rate[i], 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&med_meas2_mock);
+
+        msleep_Expect(med_waiting_time[i]);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_med_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_med_mock);
+
+        TEST_ASSERT_EQUAL_INT(0, mlx90632_start_measurement_burst());
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_extb_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_extb_mock);
+
+        mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_extb_mock | MLX90632_START_BURST_MEAS, 0);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_extb_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_extb_mock);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_EXTENDED_MEAS1, &ext_meas1_mock | refresh_rate[i], 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&ext_meas1_mock);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_EXTENDED_MEAS2, &ext_meas2_mock | refresh_rate[i], 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&ext_meas2_mock);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_EE_EXTENDED_MEAS3, &ext_meas3_mock | refresh_rate[i], 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&ext_meas3_mock);
+
+        msleep_Expect(ext_waiting_time[i]);
+
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_ext_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_med_mock);
+
+        TEST_ASSERT_EQUAL_INT(0, mlx90632_start_measurement_burst());
+    }
 }
 
 void test_set_meas_type_success(void)
