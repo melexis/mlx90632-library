@@ -75,7 +75,7 @@ extern void usleep(int min_range, int max_range);
 
 /** Blocking function for sleeping in milliseconds
  *
- * milliseconds which are allowed for the thread to sleep. This is to avoid constant pinging of sensor if the
+ * milliseconds which are allowed for the thread to sleep. This is to avoid constant pinging of sensor
  * while the measurement is ongoing in sleeping step mode.
  *
  * @note Needs to be implemented externally

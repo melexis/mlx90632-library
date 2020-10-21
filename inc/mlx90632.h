@@ -178,7 +178,7 @@
 #define MLX90632_MTYP_EXTENDED_BURST 0x91
 #define MLX90632_BURST_MEASUREMENT_TYPE(meas_type) meas_type + 0x80 /**<The MSBit is only used in the software to indicate burst type measurement. The 5 LS Bits define medical ot extended measurement and are used to set the hardware*/
 
-#define MLX90632_MEAS_MAX_TIME 2000
+#define MLX90632_MEAS_MAX_TIME 2000 /**< Maximum measurement time for the lowest possible refresh rate */
 
 /** Read raw ambient and object temperature
  *
@@ -368,7 +368,7 @@ double mlx90632_get_emissivity(void);
  * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurment has started.
  *
  * @retval <0 Something failed. Check errno.h for more information
- * @retval =0 New data is available and waiting to be processed
+ * @retval 0 New data is available and waiting to be processed
  *
  * @note This function is using usleep so it is blocking!
  */

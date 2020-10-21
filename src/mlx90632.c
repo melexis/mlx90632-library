@@ -513,9 +513,9 @@ static int mlx90632_get_measurement_time(uint16_t meas)
  * The function is returning valid measurement time only for burst mode measurements.
  * An error will be returned if it is called with a continuous measurement type parameter.
  *
- * @param[in] burst_meas_type Measurement type to read the frefresh rate for
+ * @param[in] burst_meas_type Read refresh rate for burst_meas_type measurement type
  *
- * @retval >= Refresh time in ms
+ * @retval >=0 Refresh time in ms
  * @retval <0 Something went wrong. Check errno.h for more details.
  */
 static int mlx90632_calculate_dataset_ready_time(void)
@@ -587,7 +587,7 @@ int32_t mlx90632_start_measurement_burst(void)
     ret = mlx90632_calculate_dataset_ready_time();
     if (ret < 0)
         return ret;
-    msleep(ret);
+    msleep(ret); /* Waiting for refresh of all the measurement tables */
 
     while (tries-- > 0)
     {
