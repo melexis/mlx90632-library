@@ -66,7 +66,7 @@
 #ifndef GENMASK
 #ifndef BITS_PER_LONG
 #warning "Using default BITS_PER_LONG value"
-#define BITS_PER_LONG 32 /**< Define how many bits per long your CPU has */
+#define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
 #endif
 #define GENMASK(h, l) \
     (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
@@ -177,6 +177,8 @@
 #define MLX90632_MTYP_MEDICAL_BURST 0x80
 #define MLX90632_MTYP_EXTENDED_BURST 0x91
 #define MLX90632_BURST_MEASUREMENT_TYPE(meas_type) meas_type + 0x80 /**<The MSBit is only used in the software to indicate burst type measurement. The 5 LS Bits define medical ot extended measurement and are used to set the hardware*/
+#define MLX90632_MEASUREMENT_TYPE_STATUS(mtyp_type) (mtyp_type & 0x7F) /**< Extract the measurement type from MTYP */
+#define MLX90632_MEASUREMENT_BURST_STATUS(mtyp_type) mtyp_type & 0x80 /**< Extract the measurement burst/continuous type from MTYP */
 
 #define MLX90632_MEAS_MAX_TIME 2000 /**< Maximum measurement time for the lowest possible refresh rate */
 
