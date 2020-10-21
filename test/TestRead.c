@@ -1212,9 +1212,9 @@ void test_read_temp_raw_extended_burst_success(void)
     int16_t object_mock_b2 = -35;
     int16_t object_mock_v1 = 4;
     int16_t object_mock_v2 = -2;
-    uint16_t meas1_mock = 8300;
-    uint16_t meas2_mock = 8312;
-    uint16_t meas3_mock = 830C;
+    uint16_t meas1_mock = 0x8300;
+    uint16_t meas2_mock = 0x8312;
+    uint16_t meas3_mock = 0x830C;
 
     //Start measurement expectations
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, 0);
@@ -1298,9 +1298,9 @@ void test_read_temp_raw_extended_burst_errors(void)
     uint16_t reg_ctrl_mock = 0x0112; // ctrl_reg value extended sleeping step meas selected
     uint16_t reg_status_mock = 0x01CF;  // cycle position 19 & data ready & device is not busy
     int16_t ambient_new_mock = 22454;
-    uint16_t meas1_mock = 8300;
-    uint16_t meas2_mock = 8312;
-    uint16_t meas3_mock = 830C;
+    uint16_t meas1_mock = 0x8300;
+    uint16_t meas2_mock = 0x8312;
+    uint16_t meas3_mock = 0x830C;
 
     // 1st read returns an error
     //Start measurement expectations
