@@ -314,7 +314,7 @@ int32_t mlx90632_set_meas_type(uint8_t type)
         return ret;
 
     reg_ctrl = reg_ctrl & (~MLX90632_CFG_MTYP_MASK & ~MLX90632_CFG_PWR_MASK);
-    reg_ctrl |= (MLX90632_MTYP_STATUS((type & 0x7F)) | MLX90632_PWR_STATUS_HALT);   //mask out the MSBit only used in the software to indicate burst mode
+    reg_ctrl |= (MLX90632_MTYP_STATUS(MLX90632_MEASUREMENT_TYPE_STATUS(type)) | MLX90632_PWR_STATUS_HALT);
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl);
     if (ret < 0)
@@ -325,7 +325,7 @@ int32_t mlx90632_set_meas_type(uint8_t type)
         return ret;
 
     reg_ctrl = reg_ctrl & ~MLX90632_CFG_PWR_MASK;
-    if (type & 0x80)                                      //Check the MSBit that is used only in software to indicate burst mode
+    if (MLX90632_MEASUREMENT_BURST_STATUS(type))
     {
         reg_ctrl |= MLX90632_PWR_STATUS_SLEEP_STEP;
     }
