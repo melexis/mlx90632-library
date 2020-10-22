@@ -508,19 +508,10 @@ static int mlx90632_get_measurement_time(uint16_t meas)
     return MLX90632_MEAS_MAX_TIME >> reg;
 }
 
-/** Reads the refresh rate and calculates the time needed for a whole measurment table from the EEPROM settings.
- *
- * The function is returning valid measurement time only for burst mode measurements.
- * An error will be returned if it is called with a continuous measurement type parameter.
- *
- *
- * @retval >=0 Refresh time in ms
- * @retval <0 Something went wrong. Check errno.h for more details.
- */
-static int mlx90632_calculate_dataset_ready_time(void)
+int32_t mlx90632_calculate_dataset_ready_time(void)
 {
     int32_t ret;
-    int refresh_time;
+    int32_t refresh_time;
 
     ret = mlx90632_get_meas_type();
     if (ret < 0)
