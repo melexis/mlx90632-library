@@ -380,6 +380,15 @@ double mlx90632_get_emissivity(void);
  */
 int32_t mlx90632_start_measurement_burst(void);
 
+/** Reads the refresh rate and calculates the time needed for a single measurment from the EEPROM settings.
+ *
+ * @param[in] meas Measurement to read the frefresh rate for
+ *
+ * @retval >=0 Refresh time in ms
+ * @retval <0 Something went wrong. Check errno.h for more details.
+ */
+int32_t mlx90632_get_measurement_time(uint16_t meas);
+
 /** Reads the refresh rate and calculates the time needed for a whole measurment table from the EEPROM settings.
  *
  * The function is returning valid measurement time only for burst mode measurements.
