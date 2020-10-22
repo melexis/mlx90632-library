@@ -374,12 +374,22 @@ double mlx90632_get_emissivity(void);
  * @retval 0 New data is available and waiting to be processed
  *
  * @note This function is using usleep and msleep. Because of usleep it is blocking, while msleep implementation can have a thread switch!
-  * In case both are blocking expect up to 2 second freeze of CPU in worse case scenario (depending on Refresh rate setting), so
-  * you might also need to take care of Watch Dog.
+ * In case both are blocking expect up to 2 second freeze of CPU in worse case scenario (depending on Refresh rate setting), so
+ * you might also need to take care of Watch Dog.
  */
 int32_t mlx90632_start_measurement_burst(void);
 
-/** Trigger system reset for mlx90632t
+/** Reads the refresh rate and calculates the time needed for a whole measurment table from the EEPROM settings.
+ *
+ * The function is returning valid measurement time only for burst mode measurements.
+ * An error will be returned if it is called with a continuous measurement type parameter.
+ *
+ * @retval >=0 Refresh time in ms
+ * @retval <0 Something went wrong. Check errno.h for more details.
+ */
+int32_t mlx90632_calculate_dataset_ready_time(void);
+
+/** Trigger system reset for mlx90632
  *
  * Perform full reset of mlx90632 using reset command.
  * It also waits for at least 150us to ensure the mlx90632 device is properly reset and ready for further communications.
