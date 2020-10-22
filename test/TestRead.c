@@ -1086,7 +1086,6 @@ void test_start_measurement_burst_errors(void)
     uint16_t meas1_mock = 0x820D;
     uint16_t meas2_mock = 0x821D;
 
-
     //mlx90632_reg_ctrl read error
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1156,7 +1155,6 @@ void test_start_measurement_burst_timeout(void)
     uint16_t reg_status_mock[100];
     uint16_t meas1_mock = 0x820D;
     uint16_t meas2_mock = 0x821D;
-
     int i;
 
     for (i = 0; i < 100; ++i)
@@ -1182,7 +1180,6 @@ void test_start_measurement_burst_timeout(void)
     mlx90632_i2c_read_ReturnThruPtr_value(&meas2_mock);
 
     msleep_Expect(1000);
-
 
     for (i = 0; i < 100; ++i)
     {
@@ -1359,7 +1356,6 @@ void test_read_temp_raw_burst_success(void)
     uint16_t meas1_mock = 0x820D;
     uint16_t meas2_mock = 0x821D;
 
-
     //Start measurement expectations
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, 0);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1481,7 +1477,6 @@ void test_calculate_dataset_ready_time_success(void)
     uint16_t ext_meas3_mock[8] = { 0x800C, 0x810C, 0x820C, 0x830C, 0x840C, 0x850C, 0x860C, 0x870C };
     int med_waiting_time[8] = { 4000, 2000, 1000, 500, 250, 124, 62, 30 };
     int ext_waiting_time[8] = { 6000, 3000, 1500, 750, 375, 186, 93, 45 };
-
     int i;
 
     for (i = 0; i < 8; i++)
