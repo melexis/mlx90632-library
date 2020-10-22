@@ -1429,7 +1429,6 @@ void test_read_temp_raw_burst_errors(void)
     uint16_t meas1_mock = 0x820D;
     uint16_t meas2_mock = 0x821D;
 
-
     // 1st read returns an error
     //Start measurement expectations
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, -EPERM);
@@ -1886,4 +1885,3 @@ void test_get_meas_type_errors(void)
 }
 
 ///@}
-
