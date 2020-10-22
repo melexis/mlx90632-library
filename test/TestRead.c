@@ -1151,13 +1151,14 @@ void test_start_measurement_burst_errors(void)
  */
 void test_start_measurement_burst_timeout(void)
 {
+    #define MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES 100
     uint16_t reg_ctrl_mock = 0x0002;
-    uint16_t reg_status_mock[100];
+    uint16_t reg_status_mock[MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES];
     uint16_t meas1_mock = 0x820D;
     uint16_t meas2_mock = 0x821D;
     int i;
 
-    for (i = 0; i < 100; ++i)
+    for (i = 0; i < MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES; ++i)
         reg_status_mock[i] = 0x0C06; // cycle position 1 & device busy for all samples!
 
     // Start measurement expectations
@@ -1181,7 +1182,7 @@ void test_start_measurement_burst_timeout(void)
 
     msleep_Expect(1000);
 
-    for (i = 0; i < 100; ++i)
+    for (i = 0; i < MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES; ++i)
     {
         mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock[i], 0);
         mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
