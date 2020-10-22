@@ -1145,7 +1145,7 @@ void test_start_measurement_burst_errors(void)
 
 /** Test sensor timeouts while start_measure.
  *
- * If this happens in real life it means that after 150 tries sensor still did not indicate data ready, which probably
+ * If this happens in real life it means that after some tries sensor still did not indicate data ready, which probably
  * points to much larger problem than a simple timeout. Timeout is only valid if usleep is a lot shorter than default
  * values
  */
