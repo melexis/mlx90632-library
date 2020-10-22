@@ -367,22 +367,25 @@ double mlx90632_get_emissivity(void);
  *
  * Trigger a single measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
  * The SOB bit is set so that the complete measurement table is re-freshed.
+ *
  * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurment has started.
  *
  * @retval <0 Something failed. Check errno.h for more information
  * @retval 0 New data is available and waiting to be processed
  *
- * @note This function is using usleep so it is blocking!
+ * @note This function is using usleep and msleep. Because of usleep it is blocking, while msleep implementation can have a thread switch!
+  * In case both are blocking expect up to 2 second freeze of CPU in worse case scenario (depending on Refresh rate setting), so
+  * you might also need to take care of Watch Dog.
  */
 int32_t mlx90632_start_measurement_burst(void);
 
-/** mlx90632 i2c addressed reset
+/** Trigger system reset for mlx90632t
  *
- * Send a reset command through i2c to a mlx90632 device with a specified slave address.
+ * Perform full reset of mlx90632 using reset command.
  * It also waits for at least 150us to ensure the mlx90632 device is properly reset and ready for further communications.
  *
  * @retval <0 Something failed. Check errno.h for more information
- * @retval =0 The mlx90632 device is propely reset and ready for communication.
+ * @retval 0 The mlx90632 device was properly reset and is now ready for communication.
  *
  * @note This function is using usleep so it is blocking!
  */
