@@ -1468,12 +1468,12 @@ void test_read_temp_raw_burst_errors(void)
 void test_calculate_dataset_ready_time_medical_success(void)
 {
     uint16_t reg_ctrl_medb_mock = 0x0002; // ctrl_reg value medical sleeping step meas selected
-    uint16_t med_meas1_mock[8] = { 0x800D, 0x810D, 0x820D, 0x830D, 0x840D, 0x850D, 0x860D, 0x870D };
-    uint16_t med_meas2_mock[8] = { 0x801D, 0x811D, 0x821D, 0x831D, 0x841D, 0x851D, 0x861D, 0x871D };
-    int med_waiting_time[8] = { 4000, 2000, 1000, 500, 250, 124, 62, 30 };
+    uint16_t med_meas1_mock[] = { 0x800D, 0x810D, 0x820D, 0x830D, 0x840D, 0x850D, 0x860D, 0x870D };
+    uint16_t med_meas2_mock[] = { 0x801D, 0x811D, 0x821D, 0x831D, 0x841D, 0x851D, 0x861D, 0x871D };
+    int med_waiting_time[] = { 4000, 2000, 1000, 500, 250, 124, 62, 30 };
     int i;
 
-    for (i = 0; i < 8; i++)
+    for (i = 0; i < (sizeof(med_meas1_mock)/sizeof(med_meas1_mock[0])); i++)
     {
         mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_medb_mock, 0);
         mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1494,13 +1494,13 @@ void test_calculate_dataset_ready_time_medical_success(void)
 void test_calculate_dataset_ready_time_extended_success(void)
 {
     uint16_t reg_ctrl_extb_mock = 0x0112; // ctrl_reg value extended sleeping step meas selected
-    uint16_t ext_meas1_mock[8] = { 0x8000, 0x8100, 0x8200, 0x8300, 0x8400, 0x8500, 0x8600, 0x8700 };
-    uint16_t ext_meas2_mock[8] = { 0x8012, 0x8112, 0x8212, 0x8312, 0x8412, 0x8512, 0x8612, 0x8712 };
-    uint16_t ext_meas3_mock[8] = { 0x800C, 0x810C, 0x820C, 0x830C, 0x840C, 0x850C, 0x860C, 0x870C };
-    int ext_waiting_time[8] = { 6000, 3000, 1500, 750, 375, 186, 93, 45 };
+    uint16_t ext_meas1_mock[] = { 0x8000, 0x8100, 0x8200, 0x8300, 0x8400, 0x8500, 0x8600, 0x8700 };
+    uint16_t ext_meas2_mock[] = { 0x8012, 0x8112, 0x8212, 0x8312, 0x8412, 0x8512, 0x8612, 0x8712 };
+    uint16_t ext_meas3_mock[] = { 0x800C, 0x810C, 0x820C, 0x830C, 0x840C, 0x850C, 0x860C, 0x870C };
+    int ext_waiting_time[] = { 6000, 3000, 1500, 750, 375, 186, 93, 45 };
     int i;
 
-    for (i = 0; i < 8; i++)
+    for (i = 0; i < (sizeof(ext_meas1_mock)/sizeof(ext_meas1_mock[0])); i++)
     {
         mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_extb_mock, 0);
         mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
