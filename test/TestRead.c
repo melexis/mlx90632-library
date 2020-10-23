@@ -146,10 +146,10 @@ void test_start_measurement_busy_i2c(void)
 void test_start_measurement_timeout(void)
 {
     uint16_t reg_status_first_mock = 0x06;
-    uint16_t reg_status_mock[100];
+    uint16_t reg_status_mock[MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES];
     int i;
 
-    for (i = 0; i < 100; ++i)
+    for (i = 0; i < MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES; ++i)
         reg_status_mock[i] = 0x0006; // cycle position 1 & data NOT READY through whole array!
 
     // Start measurement expectations
@@ -159,7 +159,7 @@ void test_start_measurement_timeout(void)
 
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_first_mock & (~MLX90632_STAT_DATA_RDY), 0);
 
-    for (i = 0; i < 100; ++i)
+    for (i = 0; i < MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES; ++i)
     {
         mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock[i], 0);
         mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1151,7 +1151,6 @@ void test_start_measurement_burst_errors(void)
  */
 void test_start_measurement_burst_timeout(void)
 {
-    #define MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES 100
     uint16_t reg_ctrl_mock = 0x0002;
     uint16_t reg_status_mock[MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES];
     uint16_t meas1_mock = 0x820D;
@@ -1473,7 +1472,7 @@ void test_calculate_dataset_ready_time_medical_success(void)
     int med_waiting_time[] = { 4000, 2000, 1000, 500, 250, 124, 62, 30 };
     int i;
 
-    for (i = 0; i < (sizeof(med_meas1_mock)/sizeof(med_meas1_mock[0])); i++)
+    for (i = 0; i < (sizeof(med_meas1_mock) / sizeof(med_meas1_mock[0])); i++)
     {
         mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_medb_mock, 0);
         mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
@@ -1500,7 +1499,7 @@ void test_calculate_dataset_ready_time_extended_success(void)
     int ext_waiting_time[] = { 6000, 3000, 1500, 750, 375, 186, 93, 45 };
     int i;
 
-    for (i = 0; i < (sizeof(ext_meas1_mock)/sizeof(ext_meas1_mock[0])); i++)
+    for (i = 0; i < (sizeof(ext_meas1_mock) / sizeof(ext_meas1_mock[0])); i++)
     {
         mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_extb_mock, 0);
         mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
