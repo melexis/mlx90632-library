@@ -296,7 +296,6 @@ double mlx90632_calc_temp_object_extended(int32_t object, int32_t ambient, doubl
     return temp;
 }
 
-
 int32_t mlx90632_set_meas_type(uint8_t type)
 {
     int32_t ret;
@@ -355,7 +354,7 @@ int32_t mlx90632_get_meas_type(void)
     if ((reg_ctrl != MLX90632_MTYP_MEDICAL) & (reg_ctrl != MLX90632_MTYP_EXTENDED))
         return -EINVAL;
 
-    reg_temp = GET_PWR_STATUS(reg_temp);
+    reg_temp = MLX90632_GET_PWR_STATUS(reg_temp);
 
     if (reg_temp == MLX90632_PWR_STATUS_SLEEP_STEP)
         return MLX90632_BURST_MEASUREMENT_TYPE(reg_ctrl);

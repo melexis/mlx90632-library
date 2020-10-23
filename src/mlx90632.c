@@ -46,7 +46,7 @@ static const char mlx90632version[] __attribute__((used)) = { VERSION };
 
 int mlx90632_start_measurement(void)
 {
-    int ret, tries = 100;
+    int ret, tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
     uint16_t reg_status;
 
     ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
@@ -553,7 +553,7 @@ int32_t mlx90632_calculate_dataset_ready_time(void)
 int32_t mlx90632_start_measurement_burst(void)
 {
     int32_t ret;
-    int tries = 100;
+    int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
     uint16_t reg;
 
     ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
