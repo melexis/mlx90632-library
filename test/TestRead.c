@@ -1579,9 +1579,9 @@ void test_calculate_dataset_ready_time_extended_errors(void)
     uint16_t ext_meas3_mock = 0x820C;
 
     //get_meas_type error
-    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_medb_mock, -EPERM);
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_extb_mock, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
-    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_medb_mock);
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_extb_mock);
 
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_calculate_dataset_ready_time());
 
