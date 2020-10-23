@@ -138,7 +138,7 @@
 #define MLX90632_PWR_STATUS_SLEEP_STEP MLX90632_PWR_STATUS(1) /**< Pwrmode sleep step*/
 #define MLX90632_PWR_STATUS_STEP MLX90632_PWR_STATUS(2) /**< Pwrmode step */
 #define MLX90632_PWR_STATUS_CONTINUOUS MLX90632_PWR_STATUS(3) /**< Pwrmode continuous*/
-#define GET_PWR_STATUS(reg_value) reg_value & MLX90632_CFG_PWR_MASK /**<Gets the power status bits*/
+#define MLX90632_GET_PWR_STATUS(reg_value) reg_value & MLX90632_CFG_PWR_MASK /**<Gets the power status bits*/
 /* Measurement type select*/
 #define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << 4)
 #define MLX90632_MTYP_STATUS_MEDICAL MLX90632_MTYP_STATUS(0) /**< Medical measurement type */
@@ -182,6 +182,7 @@
 #define MLX90632_MEASUREMENT_BURST_STATUS(mtyp_type) (mtyp_type & 0x80) /**< Extract the measurement burst/continuous type from MTYP */
 
 #define MLX90632_MEAS_MAX_TIME 2000 /**< Maximum measurement time for the lowest possible refresh rate */
+#define MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES 100 /**< Maximum number of read tries before quiting with timeout error */
 
 /** Read raw ambient and object temperature
  *
