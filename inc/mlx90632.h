@@ -129,16 +129,16 @@
 #define   MLX90632_CFG_MTYP_MASK GENMASK(8, 4) /**< Meas select Mask */
 #define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode */
 #define   MLX90632_CFG_SOB_MASK BIT(MLX90632_CFG_SOB_SHIFT)
-#define   MLX90632_SOB_CFG(ctrl_val) (ctrl_val << MLX90632_CFG_SOB_SHIFT)
-#define   MLX90632_START_BURST_MEAS MLX90632_SOB_CFG(1)
-#define   MLX90632_BURST_MEAS_NOT_PENDING MLX90632_SOB_CFG(0)
+#define   MLX90632_CFG_SOB(ctrl_val) (ctrl_val << MLX90632_CFG_SOB_SHIFT)
+#define   MLX90632_START_BURST_MEAS MLX90632_CFG_SOB(1)
+#define   MLX90632_BURST_MEAS_NOT_PENDING MLX90632_CFG_SOB(0)
+#define   MLX90632_CFG_PWR(ctrl_val) (ctrl_val & MLX90632_CFG_PWR_MASK) /**<Gets the power bits*/
 /* PowerModes statuses */
 #define MLX90632_PWR_STATUS(ctrl_val) (ctrl_val << 1)
 #define MLX90632_PWR_STATUS_HALT MLX90632_PWR_STATUS(0) /**< Pwrmode hold */
 #define MLX90632_PWR_STATUS_SLEEP_STEP MLX90632_PWR_STATUS(1) /**< Pwrmode sleep step*/
 #define MLX90632_PWR_STATUS_STEP MLX90632_PWR_STATUS(2) /**< Pwrmode step */
 #define MLX90632_PWR_STATUS_CONTINUOUS MLX90632_PWR_STATUS(3) /**< Pwrmode continuous*/
-#define MLX90632_GET_PWR_STATUS(reg_value) reg_value & MLX90632_CFG_PWR_MASK /**<Gets the power status bits*/
 /* Measurement type select*/
 #define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << 4)
 #define MLX90632_MTYP_STATUS_MEDICAL MLX90632_MTYP_STATUS(0) /**< Medical measurement type */
