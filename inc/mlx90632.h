@@ -181,7 +181,7 @@
 #define MLX90632_MEASUREMENT_TYPE_STATUS(mtyp_type) (mtyp_type & 0x7F) /**< Extract the measurement type from MTYP */
 #define MLX90632_MEASUREMENT_BURST_STATUS(mtyp_type) (mtyp_type & 0x80) /**< Extract the measurement burst/continuous type from MTYP */
 
-#define MLX90632_MEAS_MAX_TIME 2000 /**< Maximum measurement time for the lowest possible refresh rate */
+#define MLX90632_MEAS_MAX_TIME 2000 /**< Maximum measurement time in ms for the lowest possible refresh rate */
 #define MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES 100 /**< Maximum number of read tries before quiting with timeout error */
 
 /** Read raw ambient and object temperature
