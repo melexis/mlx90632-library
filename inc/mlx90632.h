@@ -126,13 +126,15 @@
 #define   MLX90632_CFG_SOC_SHIFT 3 /**< Start measurement in step mode */
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
-#define   MLX90632_CFG_MTYP_MASK GENMASK(8, 4) /**< Meas select Mask */
+#define   MLX90632_CFG_PWR(ctrl_val) (ctrl_val & MLX90632_CFG_PWR_MASK) /**< Extract the PowerMode bits*/
+#define   MLX90632_CFG_MTYP_SHIFT 4 /**< Meas select start shift */
+#define   MLX90632_CFG_MTYP_MASK GENMASK(8, MLX90632_CFG_MTYP_SHIFT) /**< Meas select Mask */
+#define   MLX90632_CFG_MTYP(ctrl_val) (ctrl_val & MLX90632_CFG_MTYP_MASK) /**< Extract the MeasType bits*/
 #define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode */
 #define   MLX90632_CFG_SOB_MASK BIT(MLX90632_CFG_SOB_SHIFT)
 #define   MLX90632_CFG_SOB(ctrl_val) (ctrl_val << MLX90632_CFG_SOB_SHIFT)
 #define   MLX90632_START_BURST_MEAS MLX90632_CFG_SOB(1)
 #define   MLX90632_BURST_MEAS_NOT_PENDING MLX90632_CFG_SOB(0)
-#define   MLX90632_CFG_PWR(ctrl_val) (ctrl_val & MLX90632_CFG_PWR_MASK) /**<Gets the power bits*/
 /* PowerModes statuses */
 #define MLX90632_PWR_STATUS(ctrl_val) (ctrl_val << 1)
 #define MLX90632_PWR_STATUS_HALT MLX90632_PWR_STATUS(0) /**< Pwrmode hold */
@@ -140,9 +142,10 @@
 #define MLX90632_PWR_STATUS_STEP MLX90632_PWR_STATUS(2) /**< Pwrmode step */
 #define MLX90632_PWR_STATUS_CONTINUOUS MLX90632_PWR_STATUS(3) /**< Pwrmode continuous*/
 /* Measurement type select*/
-#define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << 4)
+#define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << MLX90632_CFG_MTYP_SHIFT)
 #define MLX90632_MTYP_STATUS_MEDICAL MLX90632_MTYP_STATUS(0) /**< Medical measurement type */
 #define MLX90632_MTYP_STATUS_EXTENDED MLX90632_MTYP_STATUS(17) /**< Extended measurement type*/
+#define MLX90632_MTYP(reg_val) (MLX90632_CFG_MTYP(reg_val) >> MLX90632_CFG_MTYP_SHIFT) /**< Extract MTYP from Control register */
 
 /* Device status register - volatile */
 #define MLX90632_REG_STATUS 0x3fff /**< Device status register */

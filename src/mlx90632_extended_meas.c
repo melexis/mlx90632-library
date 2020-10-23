@@ -348,8 +348,7 @@ int32_t mlx90632_get_meas_type(void)
     if (ret < 0)
         return ret;
 
-    reg_ctrl = reg_temp & MLX90632_CFG_MTYP_MASK;
-    reg_ctrl = reg_ctrl >> 4;
+    reg_ctrl = MLX90632_MTYP(reg_temp);
 
     if ((reg_ctrl != MLX90632_MTYP_MEDICAL) & (reg_ctrl != MLX90632_MTYP_EXTENDED))
         return -EINVAL;
