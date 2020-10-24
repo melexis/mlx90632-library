@@ -163,6 +163,26 @@ int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambie
     return ret;
 }
 
+int32_t mlx90632_read_temp_raw_extended_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw)
+{
+    int32_t ret, start_measurement_ret;
+
+    // trigger and wait for measurement to complete
+    start_measurement_ret = mlx90632_start_measurement_burst();
+    if (start_measurement_ret < 0)
+        return start_measurement_ret;
+
+    /** Read new and old **ambient** values from sensor */
+    ret = mlx90632_read_temp_ambient_raw_extended(ambient_new_raw, ambient_old_raw);
+    if (ret < 0)
+        return ret;
+
+    /** Read new **object** value from sensor */
+    ret = mlx90632_read_temp_object_raw_extended(object_new_raw);
+
+    return ret;
+}
+
 double mlx90632_preprocess_temp_ambient_extended(int16_t ambient_new_raw, int16_t ambient_old_raw, int16_t Gb)
 {
     double VR_Ta, kGb;
@@ -276,16 +296,15 @@ double mlx90632_calc_temp_object_extended(int32_t object, int32_t ambient, doubl
     return temp;
 }
 
-
 int32_t mlx90632_set_meas_type(uint8_t type)
 {
     int32_t ret;
     uint16_t reg_ctrl;
 
-    if ((type != MLX90632_MTYP_MEDICAL) & (type != MLX90632_MTYP_EXTENDED))
+    if ((type != MLX90632_MTYP_MEDICAL) & (type != MLX90632_MTYP_EXTENDED) & (type != MLX90632_MTYP_MEDICAL_BURST) & (type != MLX90632_MTYP_EXTENDED_BURST))
         return -EINVAL;
 
-    ret = mlx90632_i2c_write(0x3005, MLX90632_RESET_CMD);
+    ret = mlx90632_addressed_reset();
     if (ret < 0)
         return ret;
 
@@ -294,7 +313,7 @@ int32_t mlx90632_set_meas_type(uint8_t type)
         return ret;
 
     reg_ctrl = reg_ctrl & (~MLX90632_CFG_MTYP_MASK & ~MLX90632_CFG_PWR_MASK);
-    reg_ctrl |= (MLX90632_MTYP_STATUS(type) | MLX90632_PWR_STATUS_HALT);
+    reg_ctrl |= (MLX90632_MTYP_STATUS(MLX90632_MEASUREMENT_TYPE_STATUS(type)) | MLX90632_PWR_STATUS_HALT);
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl);
     if (ret < 0)
@@ -305,7 +324,14 @@ int32_t mlx90632_set_meas_type(uint8_t type)
         return ret;
 
     reg_ctrl = reg_ctrl & ~MLX90632_CFG_PWR_MASK;
-    reg_ctrl |= MLX90632_PWR_STATUS_CONTINUOUS;
+    if (MLX90632_MEASUREMENT_BURST_STATUS(type))
+    {
+        reg_ctrl |= MLX90632_PWR_STATUS_SLEEP_STEP;
+    }
+    else
+    {
+        reg_ctrl |= MLX90632_PWR_STATUS_CONTINUOUS;
+    }
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl);
 
@@ -316,17 +342,24 @@ int32_t mlx90632_get_meas_type(void)
 {
     int32_t ret;
     uint16_t reg_ctrl;
+    uint16_t reg_temp;
 
-    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg_ctrl);
+    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg_temp);
     if (ret < 0)
         return ret;
 
-    reg_ctrl = reg_ctrl & MLX90632_CFG_MTYP_MASK;
-    reg_ctrl = reg_ctrl >> 4;
+    reg_ctrl = MLX90632_MTYP(reg_temp);
 
     if ((reg_ctrl != MLX90632_MTYP_MEDICAL) & (reg_ctrl != MLX90632_MTYP_EXTENDED))
         return -EINVAL;
 
+    reg_temp = MLX90632_CFG_PWR(reg_temp);
+
+    if (reg_temp == MLX90632_PWR_STATUS_SLEEP_STEP)
+        return MLX90632_BURST_MEASUREMENT_TYPE(reg_ctrl);
+
+    if (reg_temp != MLX90632_PWR_STATUS_CONTINUOUS)
+        return -EINVAL;
 
     return reg_ctrl;
 }

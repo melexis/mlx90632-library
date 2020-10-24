@@ -103,12 +103,18 @@
 #define MLX90632_EE_Fa      0x2428 /**< Fa calibration constant register 32bit */
 #define MLX90632_EE_Fb      0x242a /**< Fb calibration constant register 32bit */
 #define MLX90632_EE_Ga      0x242c /**< Ga calibration constant register 32bit */
-
 #define MLX90632_EE_Gb      0x242e /**< Ambient Beta calibration constant 16bit */
 #define MLX90632_EE_Ka      0x242f /**< IR Beta calibration constant 16bit */
-
 #define MLX90632_EE_Ha      0x2481 /**< Ha customer calibration value register 16bit */
 #define MLX90632_EE_Hb      0x2482 /**< Hb customer calibration value register 16bit */
+
+#define MLX90632_EE_MEDICAL_MEAS1      0x24E1 /**< Medical measurement 1 16bit */
+#define MLX90632_EE_MEDICAL_MEAS2      0x24E2 /**< Medical measurement 2 16bit */
+#define MLX90632_EE_EXTENDED_MEAS1     0x24F1 /**< Extended measurement 1 16bit */
+#define MLX90632_EE_EXTENDED_MEAS2     0x24F2 /**< Extended measurement 2 16bit */
+#define MLX90632_EE_EXTENDED_MEAS3     0x24F3 /**< Extended measurement 3 16bit */
+
+#define MLX90632_EE_REFRESH_RATE_MASK GENMASK(10, 8) /**< Refresh Rate Mask */
 
 /* Register addresses - volatile */
 #define MLX90632_REG_I2C_ADDR   0x3000 /**< Chip I2C address register */
@@ -118,7 +124,14 @@
 #define   MLX90632_CFG_SOC_SHIFT 3 /**< Start measurement in step mode */
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
-#define   MLX90632_CFG_MTYP_MASK GENMASK(8, 4) /**< Meas select Mask */
+#define   MLX90632_CFG_PWR(ctrl_val) (ctrl_val & MLX90632_CFG_PWR_MASK) /**< Extract the PowerMode bits*/
+#define   MLX90632_CFG_MTYP_SHIFT 4 /**< Meas select start shift */
+#define   MLX90632_CFG_MTYP_MASK GENMASK(8, MLX90632_CFG_MTYP_SHIFT) /**< Meas select Mask */
+#define   MLX90632_CFG_MTYP(ctrl_val) (ctrl_val & MLX90632_CFG_MTYP_MASK) /**< Extract the MeasType bits*/
+#define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode */
+#define   MLX90632_CFG_SOB_MASK BIT(MLX90632_CFG_SOB_SHIFT)
+#define   MLX90632_CFG_SOB(ctrl_val) (ctrl_val << MLX90632_CFG_SOB_SHIFT)
+
 /* PowerModes statuses */
 #define MLX90632_PWR_STATUS(ctrl_val) (ctrl_val << 1)
 #define MLX90632_PWR_STATUS_HALT MLX90632_PWR_STATUS(0) /**< Pwrmode hold */
@@ -126,9 +139,13 @@
 #define MLX90632_PWR_STATUS_STEP MLX90632_PWR_STATUS(2) /**< Pwrmode step */
 #define MLX90632_PWR_STATUS_CONTINUOUS MLX90632_PWR_STATUS(3) /**< Pwrmode continuous*/
 /* Measurement type select*/
-#define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << 4)
+#define MLX90632_MTYP_STATUS(ctrl_val) (ctrl_val << MLX90632_CFG_MTYP_SHIFT)
 #define MLX90632_MTYP_STATUS_MEDICAL MLX90632_MTYP_STATUS(0) /**< Medical measurement type */
 #define MLX90632_MTYP_STATUS_EXTENDED MLX90632_MTYP_STATUS(17) /**< Extended measurement type*/
+#define MLX90632_MTYP(reg_val) (MLX90632_CFG_MTYP(reg_val) >> MLX90632_CFG_MTYP_SHIFT) /**< Extract MTYP from Control register */
+/* Start of burst measurement options */
+#define MLX90632_START_BURST_MEAS MLX90632_CFG_SOB(1)
+#define MLX90632_BURST_MEAS_NOT_PENDING MLX90632_CFG_SOB(0)
 
 /* Device status register - volatile */
 #define MLX90632_REG_STATUS 0x3fff /**< Device status register */
@@ -157,10 +174,18 @@
 #define MLX90632_REF_3  12.0 /**< ResCtrlRef value of Channel 3 */
 #define MLX90632_XTD_RNG_KEY 0x0500 /**Extended range support indication key */
 
-/* Measurement types */
-#define MLX90632_MTYP_MEDICAL 0
-#define MLX90632_MTYP_EXTENDED 17
+/* Measurement types - the MSBit is for software purposes only and has no hardware bit related to it. It indicates continuous '0' or sleeping step burst - '1' measurement mode*/
+#define MLX90632_MTYP_MEDICAL 0x00
+#define MLX90632_MTYP_EXTENDED 0x11
+#define MLX90632_MTYP_MEDICAL_BURST 0x80
+#define MLX90632_MTYP_EXTENDED_BURST 0x91
+#define MLX90632_BURST_MEASUREMENT_TYPE(meas_type) (meas_type + 0x80) /**< The MSBit is only used in the software to indicate burst type measurement. The 5 LS Bits define medical or extended measurement and are used to set the hardware */
 
+#define MLX90632_MEASUREMENT_TYPE_STATUS(mtyp_type) (mtyp_type & 0x7F) /**< Extract the measurement type from MTYP */
+#define MLX90632_MEASUREMENT_BURST_STATUS(mtyp_type) (mtyp_type & 0x80) /**< Extract the measurement burst/continuous type from MTYP */
+
+#define MLX90632_MEAS_MAX_TIME 2000 /**< Maximum measurement time in ms for the lowest possible refresh rate */
+#define MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES 100 /**< Maximum number of read tries before quiting with timeout error */
 
 /** Read raw ambient and object temperature
  *
@@ -180,6 +205,25 @@
  */
 int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
                                int16_t *object_new_raw, int16_t *object_old_raw);
+
+/** Read raw ambient and object temperature in sleeping step mode
+ *
+ * Trigger and read raw ambient and object temperatures. This values still need
+ * to be pre-processed via @link mlx90632_preprocess_temp_ambient @endlink and @link
+ * mlx90632_preprocess_temp_object @endlink functions and then processed via @link
+ * mlx90632_calc_temp_ambient @endlink and @link mlx90632_calc_temp_object @endlink
+ * to retrieve values in milliCelsius
+ *
+ * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
+ * @param[out] object_new_raw Pointer to where new raw object temperature is written
+ * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
+ * @param[out] object_old_raw Pointer to where old raw object temperature is written
+ *
+ * @retval 0 Successfully read both temperatures
+ * @retval <0 Something went wrong. Check errno.h for more details
+ */
+int32_t mlx90632_read_temp_raw_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
+                                     int16_t *object_new_raw, int16_t *object_old_raw);
 
 /** Calculation of raw ambient output
  *
@@ -263,7 +307,7 @@ double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
  * when the object has emissivity lower than 1 then it does not just emit InfraRed light, but also reflects it.
  * That is why measurement of the ambient temperature around object is important to help calculating more precise object temperature.
  * This function makes it possible to add object environment temperature and offset it with sensor's ambient temperature to calculate more precise
- * object temeprature. DSPv5 implementation of object temperature calculation with customer
+ * object temperature. DSPv5 implementation of object temperature calculation with customer
  * calibration data
  *
  * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
@@ -324,6 +368,52 @@ void mlx90632_set_emissivity(double value);
  */
 double mlx90632_get_emissivity(void);
 
+/** Trigger start of burst measurement for mlx90632
+ *
+ * Trigger a single measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
+ * The SOB bit is set so that the complete measurement table is re-freshed.
+ *
+ * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurement has started.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval 0 New data is available and waiting to be processed
+ *
+ * @note This function is using usleep and msleep. Because of usleep it is blocking, while msleep implementation can have a thread switch!
+ * In case both are blocking expect up to 2 second freeze of CPU in worse case scenario (depending on Refresh rate setting), so
+ * you might also need to take care of Watch Dog.
+ */
+int32_t mlx90632_start_measurement_burst(void);
+
+/** Reads the refresh rate and calculates the time needed for a single measurment from the EEPROM settings.
+ *
+ * @param[in] meas Measurement to read the frefresh rate for
+ *
+ * @retval >=0 Refresh time in ms
+ * @retval <0 Something went wrong. Check errno.h for more details.
+ */
+int32_t mlx90632_get_measurement_time(uint16_t meas);
+
+/** Reads the refresh rate and calculates the time needed for a whole measurment table from the EEPROM settings.
+ *
+ * The function is returning valid measurement time only for burst mode measurements.
+ * An error will be returned if it is called with a continuous measurement type parameter.
+ *
+ * @retval >=0 Refresh time in ms
+ * @retval <0 Something went wrong. Check errno.h for more details.
+ */
+int32_t mlx90632_calculate_dataset_ready_time(void);
+
+/** Trigger system reset for mlx90632
+ *
+ * Perform full reset of mlx90632 using reset command.
+ * It also waits for at least 150us to ensure the mlx90632 device is properly reset and ready for further communications.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval 0 The mlx90632 device was properly reset and is now ready for communication.
+ *
+ * @note This function is using usleep so it is blocking!
+ */
+int32_t mlx90632_addressed_reset(void);
 ///@}
 
 #ifdef TEST

@@ -73,5 +73,15 @@ extern int32_t mlx90632_i2c_write(int16_t register_address, uint16_t value);
  */
 extern void usleep(int min_range, int max_range);
 
+/** Blocking function for sleeping in milliseconds
+ *
+ * milliseconds which are allowed for the thread to sleep. This is to avoid constant pinging of sensor
+ * while the measurement is ongoing in sleeping step mode.
+ *
+ * @note Needs to be implemented externally
+ * @param[in] msecs Amount of milliseconds to sleep
+ */
+extern void msleep(int msecs);
+
 ///@}
 #endif
