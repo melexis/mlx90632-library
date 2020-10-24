@@ -103,10 +103,8 @@
 #define MLX90632_EE_Fa      0x2428 /**< Fa calibration constant register 32bit */
 #define MLX90632_EE_Fb      0x242a /**< Fb calibration constant register 32bit */
 #define MLX90632_EE_Ga      0x242c /**< Ga calibration constant register 32bit */
-
 #define MLX90632_EE_Gb      0x242e /**< Ambient Beta calibration constant 16bit */
 #define MLX90632_EE_Ka      0x242f /**< IR Beta calibration constant 16bit */
-
 #define MLX90632_EE_Ha      0x2481 /**< Ha customer calibration value register 16bit */
 #define MLX90632_EE_Hb      0x2482 /**< Hb customer calibration value register 16bit */
 
@@ -133,8 +131,7 @@
 #define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode */
 #define   MLX90632_CFG_SOB_MASK BIT(MLX90632_CFG_SOB_SHIFT)
 #define   MLX90632_CFG_SOB(ctrl_val) (ctrl_val << MLX90632_CFG_SOB_SHIFT)
-#define   MLX90632_START_BURST_MEAS MLX90632_CFG_SOB(1)
-#define   MLX90632_BURST_MEAS_NOT_PENDING MLX90632_CFG_SOB(0)
+
 /* PowerModes statuses */
 #define MLX90632_PWR_STATUS(ctrl_val) (ctrl_val << 1)
 #define MLX90632_PWR_STATUS_HALT MLX90632_PWR_STATUS(0) /**< Pwrmode hold */
@@ -146,6 +143,9 @@
 #define MLX90632_MTYP_STATUS_MEDICAL MLX90632_MTYP_STATUS(0) /**< Medical measurement type */
 #define MLX90632_MTYP_STATUS_EXTENDED MLX90632_MTYP_STATUS(17) /**< Extended measurement type*/
 #define MLX90632_MTYP(reg_val) (MLX90632_CFG_MTYP(reg_val) >> MLX90632_CFG_MTYP_SHIFT) /**< Extract MTYP from Control register */
+/* Start of burst measurement options */
+#define MLX90632_START_BURST_MEAS MLX90632_CFG_SOB(1)
+#define MLX90632_BURST_MEAS_NOT_PENDING MLX90632_CFG_SOB(0)
 
 /* Device status register - volatile */
 #define MLX90632_REG_STATUS 0x3fff /**< Device status register */
@@ -174,7 +174,7 @@
 #define MLX90632_REF_3  12.0 /**< ResCtrlRef value of Channel 3 */
 #define MLX90632_XTD_RNG_KEY 0x0500 /**Extended range support indication key */
 
-/* Measurement types - the MSBit is for software purposes only and has no hardware bit related to it. It indicates continious '0' or sleeping step burst - '1' measurement mode*/
+/* Measurement types - the MSBit is for software purposes only and has no hardware bit related to it. It indicates continuous '0' or sleeping step burst - '1' measurement mode*/
 #define MLX90632_MTYP_MEDICAL 0x00
 #define MLX90632_MTYP_EXTENDED 0x11
 #define MLX90632_MTYP_MEDICAL_BURST 0x80
@@ -307,7 +307,7 @@ double mlx90632_calc_temp_object(int32_t object, int32_t ambient,
  * when the object has emissivity lower than 1 then it does not just emit InfraRed light, but also reflects it.
  * That is why measurement of the ambient temperature around object is important to help calculating more precise object temperature.
  * This function makes it possible to add object environment temperature and offset it with sensor's ambient temperature to calculate more precise
- * object temeprature. DSPv5 implementation of object temperature calculation with customer
+ * object temperature. DSPv5 implementation of object temperature calculation with customer
  * calibration data
  *
  * @param[in] object object temperature from @link mlx90632_preprocess_temp_object @endlink
@@ -373,7 +373,7 @@ double mlx90632_get_emissivity(void);
  * Trigger a single measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
  * The SOB bit is set so that the complete measurement table is re-freshed.
  *
- * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurment has started.
+ * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurement has started.
  *
  * @retval <0 Something failed. Check errno.h for more information
  * @retval 0 New data is available and waiting to be processed
