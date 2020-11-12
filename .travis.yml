@@ -30,6 +30,7 @@ stages:
   - test
   - static
   - coverage
+  - doc
   - deploy
 
 os: linux
@@ -260,6 +261,23 @@ jobs:
       if: type IN (push, pull_request)
       env:
         - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
+# --- Docs check ---
+    - stage: deploy
+      # Install dependencies
+      os: linux
+      addons:
+        apt:
+          packages:
+            - doxygen
+            - doxygen-doc
+            - doxygen-latex
+            - doxygen-gui
+            - graphviz
+            - python3-pip
+      before_script:
+        - pip3 install mlx.warnings
+      script:
+        - mlx-warnings --doxygen --exact-warnings 7 --command make doxy
 # --- Deploy of docs ---
     - stage: deploy
       # Install dependencies
