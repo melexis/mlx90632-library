@@ -114,7 +114,24 @@
 #define MLX90632_EE_EXTENDED_MEAS2     0x24F2 /**< Extended measurement 2 16bit */
 #define MLX90632_EE_EXTENDED_MEAS3     0x24F3 /**< Extended measurement 3 16bit */
 
-#define MLX90632_EE_REFRESH_RATE_MASK GENMASK(10, 8) /**< Refresh Rate Mask */
+/* Refresh Rate */
+typedef enum mlx90632_meas_e {
+    MLX90632_MEAS_HZ_ERROR = -1,
+    MLX90632_MEAS_HZ_HALF = 0,
+    MLX90632_MEAS_HZ_1 = 1,
+    MLX90632_MEAS_HZ_2 = 2,
+    MLX90632_MEAS_HZ_4 = 3,
+    MLX90632_MEAS_HZ_8 = 4,
+    MLX90632_MEAS_HZ_16 = 5,
+    MLX90632_MEAS_HZ_32 = 6,
+    MLX90632_MEAS_HZ_64 = 7,
+} mlx90632_meas_t;
+#define MLX90632_EE_REFRESH_RATE_START 10 /**< Refresh Rate Start bit */
+#define MLX90632_EE_REFRESH_RATE_SHIFT 8 /**< Refresh Rate shift */
+#define MLX90632_EE_REFRESH_RATE_MASK GENMASK(MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT) /**< Refresh Rate Mask */
+#define MLX90632_EE_REFRESH_RATE(ee_val) (ee_val & MLX90632_EE_REFRESH_RATE_MASK) /**< Extract the Refresh Rate bits*/
+#define MLX90632_REFRESH_RATE(ee_val) (MLX90632_EE_REFRESH_RATE(ee_val) >> MLX90632_EE_REFRESH_RATE_SHIFT) /**< Extract Refresh Rate from ee register */
+#define MLX90632_REFRESH_RATE_STATUS(mlx90632_meas) (mlx90632_meas << MLX90632_EE_REFRESH_RATE_SHIFT)  /**< Extract the Refresh Rate bits */
 
 /* Register addresses - volatile */
 #define MLX90632_REG_I2C_ADDR   0x3000 /**< Chip I2C address register */
@@ -187,18 +204,11 @@
 #define MLX90632_MEAS_MAX_TIME 2000 /**< Maximum measurement time in ms for the lowest possible refresh rate */
 #define MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES 100 /**< Maximum number of read tries before quiting with timeout error */
 
-/* Refresh rates */
-typedef enum MLX90632_MEAS {
-    MLX90632_MEAS_HZ_ERROR = -1,
-    MLX90632_MEAS_HZ_HALF = 0,
-    MLX90632_MEAS_HZ_1 = 1,
-    MLX90632_MEAS_HZ_2 = 2,
-    MLX90632_MEAS_HZ_4 = 3,
-    MLX90632_MEAS_HZ_8 = 4,
-    MLX90632_MEAS_HZ_16 = 5,
-    MLX90632_MEAS_HZ_32 = 6,
-    MLX90632_MEAS_HZ_64 = 7,
-} MLX90632_MEAS;
+/* Gets a new register value based on the old register value - only writing the value based on the desired bits
+ * Masks the old register and shifts teh new value in
+ */
+#define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) \
+    ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
 
 /** Read raw ambient and object temperature
  *
@@ -427,20 +437,21 @@ int32_t mlx90632_calculate_dataset_ready_time(void);
  * @note This function is using usleep so it is blocking!
  */
 int32_t mlx90632_addressed_reset(void);
+
 /** Sets the refresh rate of the sensor using the MLX90632_EE_MEAS_1 and MLX90632_EE_MEAS_2 registers
  *
  * @param[in] MLX90632_MEAS enum refresh rate to set
  *
  * @retval <0 Something went wrong. Consult errno.h for more details.
  */
-int32_t mlx90632_set_refreshRate(MLX90632_MEAS measRate);
+int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate);
 
 /** Gets the value in MLX90632_EE_MEAS_1 and converts it to the appropriate MLX90632_MEAS enum
  *
  * @retval MLX90632_MEAS_HZ_ERROR if there is an error
  * @retval refresh rate as the MLX90632_MEAS enum
  */
-MLX90632_MEAS mlx90632_get_refreshRate(void);
+mlx90632_meas_t mlx90632_get_refresh_rate(void);
 
 ///@}
 
