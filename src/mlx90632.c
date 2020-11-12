@@ -46,7 +46,7 @@ static const char mlx90632version[] __attribute__((used)) = { VERSION };
 
 int mlx90632_start_measurement(void)
 {
-    int ret, tries = 100;
+    int ret, tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
     uint16_t reg_status;
 
     ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
@@ -215,6 +215,28 @@ int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_ra
 
     return ret;
 }
+
+int32_t mlx90632_read_temp_raw_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
+                                     int16_t *object_new_raw, int16_t *object_old_raw)
+{
+    int32_t ret, start_measurement_ret;
+
+    // trigger and wait for measurement to complete
+    start_measurement_ret = mlx90632_start_measurement_burst();
+    if (start_measurement_ret < 0)
+        return start_measurement_ret;
+
+    /** Read new and old **ambient** values from sensor */
+    ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw);
+    if (ret < 0)
+        return ret;
+
+    /** Read new and old **object** values from sensor */
+    ret = mlx90632_read_temp_object_raw(2, object_new_raw, object_old_raw);
+
+    return ret;
+}
+
 
 /* DSPv5 */
 double mlx90632_preprocess_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_raw, int16_t Gb)
@@ -449,6 +471,129 @@ int32_t mlx90632_init(void)
 
     return 0;
 }
+
+int32_t mlx90632_addressed_reset(void)
+{
+    int32_t ret;
+
+    ret = mlx90632_i2c_write(0x3005, MLX90632_RESET_CMD);
+    if (ret < 0)
+        return ret;
+
+    usleep(150, 200);
+
+    return 0;
+}
+
+int32_t mlx90632_get_measurement_time(uint16_t meas)
+{
+    int32_t ret;
+    uint16_t reg;
+
+    ret = mlx90632_i2c_read(meas, &reg);
+    if (ret < 0)
+        return ret;
+
+    reg &= MLX90632_EE_REFRESH_RATE_MASK;
+    reg = reg >> 8;
+
+    return MLX90632_MEAS_MAX_TIME >> reg;
+}
+
+int32_t mlx90632_calculate_dataset_ready_time(void)
+{
+    int32_t ret;
+    int32_t refresh_time;
+
+    ret = mlx90632_get_meas_type();
+    if (ret < 0)
+        return ret;
+
+    if ((ret != MLX90632_MTYP_MEDICAL_BURST) && (ret != MLX90632_MTYP_EXTENDED_BURST))
+        return -EINVAL;
+
+    if (ret == MLX90632_MTYP_MEDICAL_BURST)
+    {
+        ret = mlx90632_get_measurement_time(MLX90632_EE_MEDICAL_MEAS1);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = ret;
+
+        ret = mlx90632_get_measurement_time(MLX90632_EE_MEDICAL_MEAS2);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = refresh_time + ret;
+    }
+    else
+    {
+        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS1);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = ret;
+
+        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS2);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = refresh_time + ret;
+
+        ret = mlx90632_get_measurement_time(MLX90632_EE_EXTENDED_MEAS3);
+        if (ret < 0)
+            return ret;
+
+        refresh_time = refresh_time + ret;
+    }
+
+    return refresh_time;
+}
+
+int32_t mlx90632_start_measurement_burst(void)
+{
+    int32_t ret;
+    int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
+    uint16_t reg;
+
+    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
+    if (ret < 0)
+        return ret;
+
+    reg |= MLX90632_START_BURST_MEAS;
+
+    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg);
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_calculate_dataset_ready_time();
+    if (ret < 0)
+        return ret;
+    msleep(ret); /* Waiting for refresh of all the measurement tables */
+
+    while (tries-- > 0)
+    {
+        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg);
+        if (ret < 0)
+            return ret;
+        if ((reg & MLX90632_STAT_BUSY) == 0)
+            break;
+        /* minimum wait time to complete measurement
+         * should be calculated according to refresh rate
+         * atm 10ms - 11ms
+         */
+        usleep(10000, 11000);
+    }
+
+    if (tries < 0)
+    {
+        // data not ready
+        return -ETIMEDOUT;
+    }
+
+    return 0;
+}
+
 
 static int32_t unlockEEProm()
 {
