@@ -42,6 +42,24 @@
  */
 int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw);
 
+/** Read raw ambient and object temperature for extended range sleeping step mode
+ *
+ * Trigger and read raw ambient and object temperatures. This values still need
+ * to be pre-processed via @link mlx90632_preprocess_temp_ambient_extended @endlink and @link
+ * mlx90632_preprocess_temp_object_extended @endlink functions and then processed via @link
+ * mlx90632_calc_temp_ambient_extended @endlink and @link mlx90632_calc_temp_object_extended @endlink
+ * to retrieve values in milliCelsius
+ *
+ * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
+ * @param[out] object_new_raw Pointer to where new raw object temperature is written
+ * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
+ * @param[out] object_old_raw Pointer to where old raw object temperature is written
+ *
+ * @retval 0 Successfully read both temperatures
+ * @retval <0 Something went wrong. Check errno.h for more details
+ */
+int32_t mlx90632_read_temp_raw_extended_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw);
+
 /** Calculation of raw ambient output for the extended range
  *
  * Preprocessing of the raw ambient value
