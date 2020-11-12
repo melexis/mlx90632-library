@@ -262,7 +262,7 @@ jobs:
       env:
         - COPYBINS="sudo ln -fs /usr/bin/gcc-6 /usr/bin/gcc"
 # --- Docs check ---
-    - stage: deploy
+    - stage: doc
       # Install dependencies
       os: linux
       addons:
