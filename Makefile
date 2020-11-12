@@ -42,7 +42,8 @@ OBJDIR := build
 TARGET = mlx90632
 
 # Flags
-CFLAGS += -Wall		# just something for warnings...
+CFLAGS += -Wall -Wpedantic     # just something for warnings...
+CFLAGS += -Werror              # Make sure we dont have any warnings
 ARFLAGS = rcs
 # optimization levels
 # -------------------

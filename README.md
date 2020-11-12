@@ -4,6 +4,7 @@
 [![Coverity Scan](https://img.shields.io/coverity/scan/14522.svg)](https://scan.coverity.com/projects/melexis-mlx90632-library)
 [![Documentation](https://img.shields.io/badge/Documentation-published-brightgreen.svg)](https://melexis.github.io/mlx90632-library/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4367/badge)](https://bestpractices.coreinfrastructure.org/projects/4367)
 [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/melexis/mlx90632-library/issues)
 
 This is 90632 example driver with virtual i2c read/write functions. There will
