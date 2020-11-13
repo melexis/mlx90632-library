@@ -440,7 +440,7 @@ int32_t mlx90632_addressed_reset(void);
 
 /** Sets the refresh rate of the sensor using the MLX90632_EE_MEAS_1 and MLX90632_EE_MEAS_2 registers
  *
- * @param[in] MLX90632_MEAS enum refresh rate to set
+ * @param[in] measRate refresh rate to set with #mlx90632_meas_e
  *
  * @retval <0 Something went wrong. Consult errno.h for more details.
  */
