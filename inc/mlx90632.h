@@ -205,7 +205,7 @@ typedef enum mlx90632_meas_e {
 #define MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES 100 /**< Maximum number of read tries before quiting with timeout error */
 
 /* Gets a new register value based on the old register value - only writing the value based on the desired bits
- * Masks the old register and shifts teh new value in
+ * Masks the old register and shifts the new value in
  */
 #define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) \
     ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
