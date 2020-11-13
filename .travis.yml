@@ -274,6 +274,7 @@ jobs:
             - doxygen-gui
             - graphviz
             - python3-pip
+            - python3-setuptools
       before_script:
         - pip3 install --upgrade pip
         - pip3 install mlx.warnings
