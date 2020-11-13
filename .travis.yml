@@ -275,6 +275,7 @@ jobs:
             - graphviz
             - python3-pip
       before_script:
+        - pip3 install --upgrade pip
         - pip3 install mlx.warnings
       script:
         - mlx-warnings --doxygen --exact-warnings 7 --command make doxy
