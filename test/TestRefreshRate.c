@@ -1,9 +1,7 @@
 /**
  * @file
- * @brief Unit tests for reading data with virtual i2c communication from sensor
+ * @brief Unit tests for reading and writing the refresh rate with virtual i2c communication from sensor
  * @internal
- *
- * @copyright (C) 2017 Melexis N.V.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

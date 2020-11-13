@@ -595,12 +595,12 @@ int32_t mlx90632_start_measurement_burst(void)
 }
 
 
-STATIC int32_t unlock_eeporm()
+STATIC int32_t mlx90632_unlock_eeporm()
 {
     return mlx90632_i2c_write(0x3005, MLX90632_EEPROM_WRITE_KEY);
 }
 
-STATIC int32_t wait_for_eeprom_not_busy()
+STATIC int32_t mlx90632_wait_for_eeprom_not_busy()
 {
     uint16_t reg_status;
     int32_t ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
@@ -613,9 +613,9 @@ STATIC int32_t wait_for_eeprom_not_busy()
     return ret;
 }
 
-STATIC int32_t erase_eeprom(uint16_t address)
+STATIC int32_t mlx90632_erase_eeprom(uint16_t address)
 {
-    int32_t ret = unlock_eeporm();
+    int32_t ret = mlx90632_unlock_eeporm();
 
     if (ret < 0)
         return ret;
@@ -624,18 +624,18 @@ STATIC int32_t erase_eeprom(uint16_t address)
     if (ret < 0)
         return ret;
 
-    ret = wait_for_eeprom_not_busy();
+    ret = mlx90632_wait_for_eeprom_not_busy();
     return ret;
 }
 
-STATIC int32_t write_eeprom(uint16_t address, uint16_t data)
+STATIC int32_t mlx90632_write_eeprom(uint16_t address, uint16_t data)
 {
-    int32_t ret = erase_eeprom(address);
+    int32_t ret = mlx90632_erase_eeprom(address);
 
     if (ret < 0)
         return ret;
 
-    ret = unlock_eeporm();
+    ret = mlx90632_unlock_eeporm();
     if (ret < 0)
         return ret;
 
@@ -643,7 +643,7 @@ STATIC int32_t write_eeprom(uint16_t address, uint16_t data)
     if (ret < 0)
         return ret;
 
-    ret = wait_for_eeprom_not_busy();
+    ret = mlx90632_wait_for_eeprom_not_busy();
     return ret;
 }
 
@@ -655,10 +655,11 @@ int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate)
 
     if (ret < 0)
         return ret;
+
     uint16_t new_value = MLX90632_NEW_REG_VALUE(meas1, measRate, MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT);
     if (meas1 != new_value)
     {
-        ret = write_eeprom(MLX90632_EE_MEDICAL_MEAS1, new_value);
+        ret = mlx90632_write_eeprom(MLX90632_EE_MEDICAL_MEAS1, new_value);
         if (ret < 0)
             return ret;
     }
@@ -666,10 +667,11 @@ int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate)
     ret = mlx90632_i2c_read(MLX90632_EE_MEDICAL_MEAS2, &meas2);
     if (ret < 0)
         return ret;
+
     new_value = MLX90632_NEW_REG_VALUE(meas2, measRate, MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT);
     if (meas2 != new_value)
     {
-        ret = write_eeprom(MLX90632_EE_MEDICAL_MEAS2, new_value);
+        ret = mlx90632_write_eeprom(MLX90632_EE_MEDICAL_MEAS2, new_value);
     }
 
     return ret;
