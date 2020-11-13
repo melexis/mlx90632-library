@@ -449,7 +449,7 @@ int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate);
 /** Gets the value in MLX90632_EE_MEAS_1 and converts it to the appropriate MLX90632_MEAS enum
  *
  * @retval MLX90632_MEAS_HZ_ERROR if there is an error
- * @retval refresh rate as the MLX90632_MEAS enum
+ * @retval refresh_rate as the #mlx90632_meas_e
  */
 mlx90632_meas_t mlx90632_get_refresh_rate(void);
 
