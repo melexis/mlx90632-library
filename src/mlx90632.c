@@ -657,6 +657,7 @@ int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate)
         return ret;
 
     uint16_t new_value = MLX90632_NEW_REG_VALUE(meas1, measRate, MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT);
+
     if (meas1 != new_value)
     {
         ret = mlx90632_write_eeprom(MLX90632_EE_MEDICAL_MEAS1, new_value);
