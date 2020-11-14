@@ -1722,8 +1722,6 @@ void test_set_meas_type_success(void)
 void test_set_meas_type_errors(void)
 {
     uint16_t reg_ctrl_mock_med = 0xFE0F;
-    uint16_t reg_ctrl_mock_med1 = 0xFE09;
-    uint16_t reg_ctrl_mock_ext = 0xFF1F;
     uint16_t reg_ctrl_mock_ext1 = 0xFF19;
 
     // Invalid input parameter
