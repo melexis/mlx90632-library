@@ -94,7 +94,7 @@ int mlx90632_start_measurement(void)
  * @retval 0 When both memory locations are updated as per ret
  * @retval -EINVAL channel_new and channel_old were not updated
  */
-static int32_t mlx90632_channel_new_select(int32_t ret, uint8_t *channel_new, uint8_t *channel_old)
+STATIC int32_t mlx90632_channel_new_select(int32_t ret, uint8_t *channel_new, uint8_t *channel_old)
 {
     switch (ret)
     {
@@ -297,7 +297,7 @@ double mlx90632_calc_temp_ambient(int16_t ambient_new_raw, int16_t ambient_old_r
  *
  * @return Calculated object temperature for current iteration in milliCelsius
  */
-static double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32_t object, double TAdut,
+STATIC double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32_t object, double TAdut,
                                                   int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
                                                   double emissivity)
 {
@@ -345,7 +345,7 @@ static double mlx90632_calc_temp_object_iteration(double prev_object_temp, int32
  *
  * @return Calculated object temperature for current iteration in milliCelsius
  */
-static double mlx90632_calc_temp_object_iteration_reflected(double prev_object_temp, int32_t object, double TAdut, double TaTr4,
+STATIC double mlx90632_calc_temp_object_iteration_reflected(double prev_object_temp, int32_t object, double TAdut, double TaTr4,
                                                             int32_t Ga, int32_t Fa, int32_t Fb, int16_t Ha, int16_t Hb,
                                                             double emissivity)
 {
@@ -592,6 +592,102 @@ int32_t mlx90632_start_measurement_burst(void)
     }
 
     return 0;
+}
+
+
+STATIC int32_t mlx90632_unlock_eeporm()
+{
+    return mlx90632_i2c_write(0x3005, MLX90632_EEPROM_WRITE_KEY);
+}
+
+STATIC int32_t mlx90632_wait_for_eeprom_not_busy()
+{
+    uint16_t reg_status;
+    int32_t ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
+
+    while (ret >= 0 && reg_status & MLX90632_STAT_EE_BUSY)
+    {
+        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
+    }
+
+    return ret;
+}
+
+STATIC int32_t mlx90632_erase_eeprom(uint16_t address)
+{
+    int32_t ret = mlx90632_unlock_eeporm();
+
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_i2c_write(address, 0x00);
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_wait_for_eeprom_not_busy();
+    return ret;
+}
+
+STATIC int32_t mlx90632_write_eeprom(uint16_t address, uint16_t data)
+{
+    int32_t ret = mlx90632_erase_eeprom(address);
+
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_unlock_eeporm();
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_i2c_write(address, data);
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_wait_for_eeprom_not_busy();
+    return ret;
+}
+
+int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate)
+{
+    uint16_t meas1, meas2;
+
+    int32_t ret = mlx90632_i2c_read(MLX90632_EE_MEDICAL_MEAS1, &meas1);
+
+    if (ret < 0)
+        return ret;
+
+    uint16_t new_value = MLX90632_NEW_REG_VALUE(meas1, measRate, MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT);
+
+    if (meas1 != new_value)
+    {
+        ret = mlx90632_write_eeprom(MLX90632_EE_MEDICAL_MEAS1, new_value);
+        if (ret < 0)
+            return ret;
+    }
+
+    ret = mlx90632_i2c_read(MLX90632_EE_MEDICAL_MEAS2, &meas2);
+    if (ret < 0)
+        return ret;
+
+    new_value = MLX90632_NEW_REG_VALUE(meas2, measRate, MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT);
+    if (meas2 != new_value)
+    {
+        ret = mlx90632_write_eeprom(MLX90632_EE_MEDICAL_MEAS2, new_value);
+    }
+
+    return ret;
+}
+
+mlx90632_meas_t mlx90632_get_refresh_rate(void)
+{
+    int32_t ret;
+    uint16_t meas1;
+
+    ret = mlx90632_i2c_read(MLX90632_EE_MEDICAL_MEAS1, &meas1);
+    if (ret < 0)
+        return MLX90632_MEAS_HZ_ERROR;
+
+    return MLX90632_REFRESH_RATE(meas1);
 }
 
 ///@}
