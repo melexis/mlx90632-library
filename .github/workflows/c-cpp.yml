@@ -1,0 +1,26 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  compile:
+    name: Run compilation test for gcc compiler version ${{ matrix.gcc_version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        gcc_version: ['4.9','5','7']
+        os: [ubuntu-latest]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install gcc-${{ matrix.gcc_version }}
+      run: sudo apt-get install gcc-${{ matrix.gcc_version }}
+    - name: Compile
+      run: make libs
+      env:
+        CC: gcc-${{ matrix.gcc_version }}
+
