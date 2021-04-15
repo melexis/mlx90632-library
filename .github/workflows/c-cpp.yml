@@ -33,7 +33,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        clang_version: ['3.8','4.8','5','10']
+        clang_version: ['7','8','9','10']
         os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
@@ -49,7 +49,7 @@ jobs:
 # --- Style check stages ---
   style:
     name: Stylechecker
-    runs-on: ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install recent uncrustify
@@ -76,7 +76,6 @@ jobs:
         sudo apt update
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib
         pip install --user gcovr==3.3
-        sudo ln -fs /usr/bin/gcc-${{ matrix.gcc_version }} /usr/bin/gcc
     - name: Unit tests
       run: make utest
       env:
@@ -86,7 +85,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        clang_version: ['3.8','4.8','5','10']
+        clang_version: ['7','8','9','10']
         os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
@@ -94,7 +93,6 @@ jobs:
       run: |
         sudo apt-get install -y clang-${{ matrix.clang_version }} ruby rake gcc-multilib
         pip install --user gcovr==3.3
-        sudo ln -fs /usr/bin/clang-${{ matrix.clang_version }} /usr/bin/clang
     - name: Unit tests
       run: make CC=clang utest
       env:
