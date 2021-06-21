@@ -26,9 +26,9 @@ jobs:
         pip install gcovr==5.0
         sudo gem install coveralls-lcov
         sudo ln -fs /usr/bin/gcov-${{ matrix.gcc_version }} /usr/bin/gcov
-    - name: Install branch v1.13 of lcov
+    - name: Install branch v1.15 of lcov
       run: |
-        git clone --branch=v1.13 https://github.com/linux-test-project/lcov.git
+        git clone --branch=v1.15 https://github.com/linux-test-project/lcov.git
         cd lcov
         sudo make install
         cd -
