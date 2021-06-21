@@ -7,7 +7,7 @@ on:
 
 jobs:
   doc:
-    - name: Build and publish
+    name: Build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -27,6 +27,7 @@ jobs:
   deploy:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     needs: doc
+    name: Publish
     runs-on: ubuntu-latest
     steps:
     - name: Download HTML documentation from job 'test'
