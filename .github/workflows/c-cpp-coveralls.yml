@@ -1,4 +1,4 @@
-name: C coveralls CI
+name: Coveralls
 
 on:
   push:

@@ -1,5 +1,4 @@
-name: Doxygen documentation build and deploy
-
+name: Doxygen
 on:
   push:
     branches: [ master ]
