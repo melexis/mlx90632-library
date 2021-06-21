@@ -36,7 +36,7 @@ jobs:
       run: |
         make coverage
     - name: Submit results to Coveralls
-      run: |
-        coveralls-lcov --repo-token=${COVERALLS_TOKEN} build/lcov.info
-      env:
-        CC: gcc-${{ matrix.gcc_version }}
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: build/lcov.info
