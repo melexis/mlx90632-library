@@ -1,0 +1,44 @@
+name: Doxygen documentation build and deploy
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  doc:
+    - name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Doxygen and other dependencies
+      run: |
+        sudo apt update
+        sudo apt-get install -y doxygen doxygen-doc doxygen-latex doxygen-gui graphviz
+        pip3 install mlx.warnings
+    - name: Execute and build documentation
+      run: |
+        mlx-warnings --doxygen --exact-warnings 7 --command make doxy
+    - name: Upload HTML documentation
+      uses: actions/upload-artifact@v2
+      with:
+        name: html-doc
+        path: ./build/html/doxygen/html
+  deploy:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    needs: doc
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download HTML documentation from job 'test'
+      uses: actions/download-artifact@v2
+      with:
+        name: html-doc
+        path: ./build/html/doxygen/html
+    - name: Disable jekyll
+      run: touch ./build/html/doxygen/html/.nojekyll
+    - name: Deploy documentation
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build/html/doxygen/html
