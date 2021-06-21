@@ -1,9 +1,10 @@
 #HERE = File.expand_path(File.dirname(__FILE__)) + '/'
 #UNITY_ROOT = File.expand_path(File.dirname(__FILE__)) + '/unity/'
 
-PROJECT_CEEDLING_ROOT = "tools/ceedling"
-load "#{PROJECT_CEEDLING_ROOT}/lib/ceedling/rakefile.rb"
+PROJECT_CEEDLING_ROOT = "./tools/ceedling"
+load "#{PROJECT_CEEDLING_ROOT}/lib/ceedling.rb"
 
+Ceedling.load_project
 #TEMP_DIRS = [
 #	'build/test/'
 #]
