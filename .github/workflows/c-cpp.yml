@@ -119,7 +119,6 @@ jobs:
         submodules: recursive
     - name: Install gcc-${{ matrix.gcc_version }} and other dependencies
       run: |
-        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt update
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov
         pip install --user gcovr==3.3
