@@ -24,7 +24,7 @@ jobs:
         sudo apt update
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov
         pip install --user gcovr==3.3
-        gem install coveralls-lcov
+        sudo gem install coveralls-lcov
         sudo ln -fs /usr/bin/gcov-${{ matrix.clang_version }} /usr/bin/gcov
     - name: Install branch v1.13 of lcov
       run: |
