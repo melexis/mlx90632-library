@@ -98,6 +98,7 @@ jobs:
         sudo apt-get install -y clang-${{ matrix.clang_version }} ruby rake gcc-multilib lcov
         pip install --user gcovr==3.3
         sudo ln -fs /usr/bin/clang-${{ matrix.clang_version }} /usr/bin/clang
+        sudo ln -fs /usr/bin/llvm-cov-${{ matrix.clang_version }} /usr/bin/llvm-cov
     - name: Unit tests
       run: make CC=clang utest
       env:
