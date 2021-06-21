@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Define more verbose output
+ifdef DEBUG
+VERBOSITY = verbosity[4]
+HIDE_CMD =
+else
+VERBOSITY =
+HIDE_CMD = @
+endif
+
+
 # Extract current version from library git repo
 VERSION = $(shell echo `git describe --always --long --abbrev=8 --dirty`)
 
@@ -59,6 +69,7 @@ else
 CFLAGS += -Wp,-MM,-MP,-MT,$@,-MF,$(@:.o=.d)
 endif
 
+
 # Add version to source file
 CFLAGS += '-DVERSION="VERSION=$(VERSION)"'
 CFLAGS += -DSTATIC=static
@@ -91,36 +102,36 @@ all: utest libs coverage doxy
 $(C_OBJS): $(OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	@echo "Compiling $< -> $@"
-	@$(CC) $(INCLUDE) -c $< -o $@ $(CFLAGS)
+	$(HIDE_CMD)$(CC) $(INCLUDE) -c $< -o $@ $(CFLAGS)
 $(UNIT_TEST_OBJS): $(OBJDIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	@echo "Compiling unit $< -> $@"
-	@$(CC) $(INCLUDE) -c $< -o $@ $(CFLAGS)
+	$(HIDE_CMD)$(CC) $(INCLUDE) -c $< -o $@ $(CFLAGS)
 
 # build stuff together and link it to .elf
 $(TARGET): $(OBJS)
-	@$(CC) $(LFLAGS) -o $@ $^ $(DLIB)
+	$(HIDE_CMD)$(CC) $(LFLAGS) -o $@ $^ $(DLIB)
 	@echo "Linked everything to $@"
 
 libs: lib$(TARGET).a
 
 # build stuff together as library
 lib$(TARGET).a: $(C_OBJS)
-	@$(AR) $(ARFLAGS) $@$(C_OBJS)
+	$(HIDE_CMD)$(AR) $(ARFLAGS) $@$(C_OBJS)
 	@echo "Packed into archive $@"
 
 utest:
 	@echo "Building and executing unit tests as executable on PC"
-	@mkdir -p build
-	@rake -m -j 4 options:$(CC) clobber test:all
+	$(HIDE_CMD)mkdir -p build
+	$(HIDE_CMD)rake -m -j 4 $(VERBOSITY) options:$(CC) clobber test:all
 
 coverage:
 	@echo "Produce coverage information"
-	@mkdir -p build
-	@rm -f tools/ceedling/plugins/gcov/config/defaults.yml # we delete these because settings are merged
-	@rake -m -j 4 options:$(CC) clobber gcov:all
-	@lcov --directory $(OBJDIR)/gcov/out/ --output-file $(OBJDIR)/lcov.info $(LCOVFLAGS) $(LCOVCONFIG)
-	@genhtml $(OBJDIR)/lcov.info -o $(OBJDIR)/coverage/ $(LCOVCONFIG)
+	$(HIDE_CMD)mkdir -p build
+	$(HIDE_CMD)rm -f tools/ceedling/plugins/gcov/config/defaults.yml # we delete these because settings are merged
+	$(HIDE_CMD)rake -m -j 4 $(VERBOSITY) options:$(CC) clobber gcov:all
+	$(HIDE_CMD)lcov --directory $(OBJDIR)/gcov/out/ --output-file $(OBJDIR)/lcov.info $(LCOVFLAGS) $(LCOVCONFIG)
+	$(HIDE_CMD)genhtml $(OBJDIR)/lcov.info -o $(OBJDIR)/coverage/ $(LCOVCONFIG)
 
 uncrustify:
 	uncrustify -c tools/uncrustify.cfg --replace --no-backup -l C $(UNCRUSTIFY_FILES)
@@ -134,23 +145,23 @@ ci_uncrustify:
 # # rest documentation, we need to make sure we publish it at the same time
 doxy:
 	@echo "** Running doxygen on source code, destination of doxygen build is the final html folder."
-	@mkdir -p $(OBJDIR)/html/doxygen
-	@export VERSION=$(VERSION) && doxygen doxygen/doxyfile > /dev/null
+	$(HIDE_CMD)mkdir -p $(OBJDIR)/html/doxygen
+	$(HIDE_CMD)export VERSION=$(VERSION) && doxygen doxygen/doxyfile > /dev/null
 clean:
-	@rm -rf $(OBJDIR)
-	@rm -f $(TARGET)
-	@rm -f lib$(TARGET).a
+	$(HIDE_CMD)rm -rf $(OBJDIR)
+	$(HIDE_CMD)rm -f $(TARGET)
+	$(HIDE_CMD)rm -f lib$(TARGET).a
 	@echo "Deleted $(OBJDIR)/ and $(TARGET)"
 
 ctags: cscope
 
 cscope:
 	@echo "Building cscope database and ctags"
-	@rm -f cscope.files cscope.out ctags
-	@find . -name "*.c" >> cscope.files
-	@find . -name "*.h" >> cscope.files
-	@cscope -b
-	@ctags --fields=+l --langmap=c:.c.h $(SRCS) inc/* tools/ceedling/vendor/unity/src/*
+	$(HIDE_CMD)rm -f cscope.files cscope.out ctags
+	$(HIDE_CMD)find . -name "*.c" >> cscope.files
+	$(HIDE_CMD)find . -name "*.h" >> cscope.files
+	$(HIDE_CMD)cscope -b
+	$(HIDE_CMD)ctags --fields=+l --langmap=c:.c.h $(SRCS) inc/* tools/ceedling/vendor/unity/src/*
 
 # ==============================
 # Include automatic dependencies
