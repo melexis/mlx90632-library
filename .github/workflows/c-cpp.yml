@@ -104,37 +104,3 @@ jobs:
       env:
         CC: clang-${{ matrix.clang_version }}
         CXX: clang++-${{ matrix.clang_version }}
-
-# --- Coverage stages ---
-  coverage:
-    name: Get coverage information gcc ${{ matrix.gcc_version }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        gcc_version: ['10']
-        os: [ubuntu-latest]
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    - name: Install gcc-${{ matrix.gcc_version }} and other dependencies
-      run: |
-        sudo apt update
-        sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov
-        pip install --user gcovr==3.3
-        gem install coveralls-lcov
-        sudo ln -fs /usr/bin/gcov-${{ matrix.clang_version }} /usr/bin/gcov
-    - name: Install branch v1.13 of lcov
-      run: |
-        git clone --branch=v1.13 https://github.com/linux-test-project/lcov.git
-        cd lcov
-        sudo make install
-        cd -
-    - name: Make coverage
-      run: |
-        make coverage
-    - name: Submit results to Coveralls
-      run: |
-        coveralls-lcov --repo-token=${COVERALLS_TOKEN} build/lcov.info
-      env:
-        CC: gcc-${{ matrix.gcc_version }}
