@@ -1,0 +1,42 @@
+name: Coveralls
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+# --- Coverage stages ---
+  coverage:
+    name: Get coverage information gcc ${{ matrix.gcc_version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        gcc_version: ['10']
+        os: [ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Install gcc-${{ matrix.gcc_version }} and other dependencies
+      run: |
+        sudo apt update
+        sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov
+        pip install gcovr==5.0
+        sudo gem install coveralls-lcov
+        sudo ln -fs /usr/bin/gcov-${{ matrix.gcc_version }} /usr/bin/gcov
+    - name: Install branch v1.15 of lcov
+      run: |
+        git clone --branch=v1.15 https://github.com/linux-test-project/lcov.git
+        cd lcov
+        sudo make install
+        cd -
+    - name: Make coverage
+      run: |
+        make coverage
+    - name: Submit results to Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: build/lcov.info

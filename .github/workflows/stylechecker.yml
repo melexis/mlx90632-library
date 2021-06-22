@@ -1,0 +1,22 @@
+name: Stylechecker
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+# --- Style check stages ---
+  style:
+    name: Stylechecker
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install recent uncrustify
+      run: |
+        git clone https://github.com/uncrustify/uncrustify.git
+        cd uncrustify && mkdir build && cd build
+        cmake .. && sudo make install && cd ../..
+    - name: Run uncrustify
+      run: make ci_uncrustify
