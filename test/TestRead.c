@@ -1757,7 +1757,7 @@ void test_set_meas_type_errors(void)
 {
     uint16_t reg_ctrl_mock_med = 0xFE0F;
     uint16_t reg_ctrl_mock_ext1 = 0xFF19;
-    uint16_t reg_ctrl_mock_step = 0xFF1D;
+    uint16_t reg_ctrl_mock_step = 0xFE0D;
 
     // Invalid input parameter
     TEST_ASSERT_EQUAL_INT(-EINVAL, mlx90632_set_meas_type(9));
@@ -1774,7 +1774,7 @@ void test_set_meas_type_errors(void)
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
     mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
 
-    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_step, -EPERM);
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_med, -EPERM);
 
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
 
