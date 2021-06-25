@@ -475,6 +475,18 @@ int32_t mlx90632_init(void)
 int32_t mlx90632_addressed_reset(void)
 {
     int32_t ret;
+    uint16_t reg_ctrl;
+    uint16_t reg_value;
+
+    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg_value);
+    if (ret < 0)
+        return ret;
+
+    reg_ctrl = reg_value & ~MLX90632_CFG_PWR_MASK;
+    reg_ctrl |= MLX90632_PWR_STATUS_STEP;
+    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_ctrl);
+    if (ret < 0)
+        return ret;
 
     ret = mlx90632_i2c_write(0x3005, MLX90632_RESET_CMD);
     if (ret < 0)
@@ -482,7 +494,9 @@ int32_t mlx90632_addressed_reset(void)
 
     usleep(150, 200);
 
-    return 0;
+    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg_value);
+
+    return ret;
 }
 
 int32_t mlx90632_get_measurement_time(uint16_t meas)
