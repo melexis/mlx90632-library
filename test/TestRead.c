@@ -1774,7 +1774,7 @@ void test_set_meas_type_errors(void)
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
     mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock_med);
 
-    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_med, -EPERM);
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock_step, -EPERM);
 
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED));
 
