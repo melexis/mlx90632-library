@@ -701,7 +701,7 @@ mlx90632_meas_t mlx90632_get_refresh_rate(void)
     if (ret < 0)
         return MLX90632_MEAS_HZ_ERROR;
 
-    return MLX90632_REFRESH_RATE(meas1);
+    return (mlx90632_meas_t)MLX90632_REFRESH_RATE(meas1);
 }
 
 ///@}
