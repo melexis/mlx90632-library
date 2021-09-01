@@ -114,7 +114,7 @@ int main(void)
     ret = mlx90632_init();
     if(status == ERANGE)
     {
-       /* Extended mode is supported*/
+       /* Extended mode is supported */
     }
     
     /* Set MLX90632 in extended mode */
@@ -140,7 +140,125 @@ int main(void)
     double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
                                                                  ambient_old_raw, Ka);
     
-    /* Calculate object temperature */
+    /* Calculate object temperature assuming the reflected temperature equals ambient*/
+    object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+}
+```
+
+# Example program flow for burst mode
+You can either include library directly or object file. Definitions are found
+in library `inc/` folder and you need to point your compiler `-I` flag there.
+
+After you have your environment set you need to enter below flow to your program.
+
+```C
+/* Before include, make sure you have BITS_PER_LONG defined. This is a CPU
+ * specific value which is used to generate bit masks. You can also use -D
+ * to input definition to compiler via command line
+ */
+#include "mlx90632.h"
+
+/* Declare and implement here functions you find in mlx90632_depends.h */
+
+/* You can use global or local storage for EEPROM register values so declare
+ * them whereever you want. Do not forget to declare ambient_new_raw,
+ * ambient_old_raw, object_new_raw, object_old_raw
+ */
+int main(void)
+{
+    int32_t ret = 0; /**< Variable will store return values */
+    double ambient; /**< Ambient temperature in degrees Celsius */
+    double object; /**< Object temperature in degrees Celsius */
+
+    /* Read sensor EEPROM registers needed for calcualtions */
+    
+    /* Set MLX90632 in burst mode */
+    ret = mlx90632_set_meas_type(MLX90632_MTYP_MEDICAL_BURST)
+    if(ret < 0)
+        /* Something went wrong - abort */
+        return ret;
+
+    /* Now we read current ambient and object temperature */
+    ret = mlx90632_read_temp_raw_burst(&ambient_new_raw, &ambient_old_raw,
+                                       &object_new_raw, &object_old_raw);
+    if(ret < 0)
+        /* Something went wrong - abort */
+        return ret;
+
+    /* Now start calculations (no more i2c accesses) */
+    /* Calculate ambient temperature */
+    ambient = mlx90632_calc_temp_ambient(ambient_new_raw, ambient_old_raw,
+                                         P_T, P_R, P_G, P_O, Gb);
+
+    /* Get preprocessed temperatures needed for object temperature calculation */
+    double pre_ambient = mlx90632_preprocess_temp_ambient(ambient_new_raw,
+                                                          ambient_old_raw, Gb);
+    double pre_object = mlx90632_preprocess_temp_object(object_new_raw, object_old_raw,
+                                                        ambient_new_raw, ambient_old_raw,
+                                                        Ka);
+    /* Calculate object temperature assuming the reflected temperature equals ambient*/
+    object = mlx90632_calc_temp_object_reflected(pre_object, pre_ambient,ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
+}
+```
+
+# Example program flow for extended burst mode
+You can either include library directly or object file. Definitions are found
+in library `inc/` folder and you need to point your compiler `-I` flag there.
+
+After you have your environment set you need to enter below flow to your program.
+
+```C
+/* Before include, make sure you have BITS_PER_LONG defined. This is a CPU
+ * specific value which is used to generate bit masks. You can also use -D
+ * to input definition to compiler via command line
+ */
+#include "mlx90632.h"
+
+/* Declare and implement here functions you find in mlx90632_depends.h */
+
+/* You can use global or local storage for EEPROM register values so declare
+ * them whereever you want. Do not forget to declare ambient_new_raw,
+ * ambient_old_raw, object_new_raw, object_old_raw
+ */
+int main(void)
+{
+    int32_t ret = 0; /**< Variable will store return values */
+    double ambient; /**< Ambient temperature in degrees Celsius */
+    double object; /**< Object temperature in degrees Celsius */
+
+    /* Read sensor EEPROM registers needed for calcualtions */
+    
+    /* You can check if the device supports extended measurement mode */
+    ret = mlx90632_init();
+    if(status == ERANGE)
+    {
+       /* Extended mode is supported */
+    }
+    
+    /* Set MLX90632 in extended burst mode */
+    ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED_BURST)
+    if(ret < 0)
+        /* Something went wrong - abort */
+        return ret;
+
+    /* Now we read current ambient and object temperature */
+    ret = mlx90632_read_temp_raw_extended_burst(&ambient_new_raw, &ambient_old_raw, &object_new_raw);
+    if(ret < 0)
+        /* Something went wrong - abort */
+        return ret;
+
+    /* Now start calculations (no more i2c accesses) */
+    /* Calculate ambient temperature */
+    ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw, 
+                                                  PT, PR, PG, PO, Gb);
+    
+    /* Get preprocessed temperatures needed for object temperature calculation */
+    double pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
+                                                                   ambient_old_raw, Gb);
+    double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
+                                                                 ambient_old_raw, Ka);
+    
+    /* Calculate object temperature assuming the reflected temperature equals ambient*/
     object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 }
 ```
