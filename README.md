@@ -20,6 +20,7 @@ following targets:
 ```
 # All targets can take `CC=clang` variable, otherwise default compiler is GCC. If
 # you need to cross-compile just feed `CROSS_COMPILE` variable to Makefile
+# If you need more verbose command output pass DEBUG=1 to each command
 
 make libs	# builds library with single file. Include inc/ for header definitions
 make doxy	# builds doxygen documentation in build/html/
