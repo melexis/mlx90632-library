@@ -13,10 +13,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        gcc_version: ['7','8','9','10']
+        gcc_version: ['10','11','12']
         os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install gcc-${{ matrix.gcc_version }} and other dependencies
@@ -34,10 +34,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        clang_version: ['7','8','9','10']
+        clang_version: ['10','11','12','13','14','15']
         os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install clang-${{ matrix.clang_version }}
