@@ -1,5 +1,5 @@
 /**
- * @Extended range measurements implementation for MLX90632 driver with virtual i2c communication
+ * @brief Extended range measurements implementation for MLX90632 driver with virtual i2c communication
  * @internal
  *
  * @copyright (C) 2017 Melexis N.V.
