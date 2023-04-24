@@ -363,7 +363,7 @@ double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, doub
  * Please confirm that i2c read (16bit) is functioning as expected.
  *
  * @retval 0 Successfully initialized MLX90632 driver, extended range measurement not supported
- * @retval @link ERANGE @endlink Successfully initialized MLX90632 driver, extended range measurement is supported
+ * @retval ERANGE Successfully initialized MLX90632 driver, extended range measurement is supported
  * @retval <0 Something went wrong. Consult errno.h for more details.
  */
 int32_t mlx90632_init(void);
