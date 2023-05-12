@@ -9,6 +9,7 @@
   :build_root: 'build/'
   # :release_build: TRUE
   :test_file_prefix: Test
+  :use_backtrace_gdb_reporter: FALSE
   :options_paths:
     - 'targets/'
 #:release_build:
