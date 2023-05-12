@@ -22,8 +22,10 @@ jobs:
     - name: Install gcc-${{ matrix.gcc_version }} and other dependencies
       run: |
         sudo apt update
-        sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov
+        sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov wget
         pip install gcovr==5.0
+        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/0.32.0-164e950/ceedling-0.32.0-164e950.gem -O ceedling.gem
+        sudo gem install ceedling.gem
         sudo gem install coveralls-lcov
         sudo ln -fs /usr/bin/gcov-${{ matrix.gcc_version }} /usr/bin/gcov
     - name: Install branch v1.15 of lcov
