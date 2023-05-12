@@ -1,19 +1,21 @@
 :flags:
   :test:
     :compile:
-      - -Wall
-      - -Wno-address
-      - -Wno-attributes
-      - -Wno-unused-function
-      - -std=c99
-      - -fshort-enums
-      - -pedantic
-      - -fprofile-arcs
-      - -ftest-coverage
+      :*:
+        - -Wall
+        - -Wno-address
+        - -Wno-attributes
+        - -Wno-unused-function
+        - -std=c99
+        - -fshort-enums
+        - -pedantic
+        - -fprofile-arcs
+        - -ftest-coverage
     :link:
-      - -lm
-      - -lgcov
-      - --coverage
+      :*:
+        - -lm
+        - -lgcov
+        - --coverage
 
 :tools:
   :compiler:

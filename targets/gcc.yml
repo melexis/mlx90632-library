@@ -1,19 +1,21 @@
 :flags:
   :test:
     :compile:
-      - -m64
-      - -Wall
-      - -Wno-address
-      - -std=c99
-      - -pedantic
-      - -g
-      - -fprofile-arcs
-      - -ftest-coverage
+      :*:
+        - -m64
+        - -Wall
+        - -Wno-address
+        - -std=c99
+        - -pedantic
+        - -g
+        - -fprofile-arcs
+        - -ftest-coverage
     :link:
-      - -lm
-      - -m64
-      - -lgcov
-      - --coverage
+      :*:
+        - -lm
+        - -m64
+        - -lgcov
+        - --coverage
 
 :tools:
   :test_compiler:
