@@ -1,3 +1,3 @@
 [submodule "tools/ceedling"]
 	path = tools/ceedling
-	url = https://github.com/Letme/Ceedling.git
+	url = https://github.com/ThrowTheSwitch/Ceedling.git
