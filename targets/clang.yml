@@ -113,4 +113,5 @@
         - --config-file .lcovrc
         - --output-file build/artifacts/gcov/lcov.info
   :backtrace_settings:
+    :executable: donotusethis
     :optional: TRUE
