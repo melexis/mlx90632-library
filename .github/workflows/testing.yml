@@ -26,7 +26,7 @@ jobs:
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov
         pip install --user gcovr==3.3
     - name: Unit tests
-      run: make utest
+      run: make utest CC=gcc
       env:
         CC: gcc-${{ matrix.gcc_version }}
   test-clang:
