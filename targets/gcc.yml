@@ -87,3 +87,6 @@
         - --html-details
         - -r .
         - -o build/artifacts/gcov/index.html
+  :backtrace_settings:
+    :optional: TRUE
+
