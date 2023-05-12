@@ -88,6 +88,4 @@
         - -r .
         - -o build/artifacts/gcov/index.html
   :backtrace_settings:
-    :executable: donotusethis
     :optional: TRUE
-
