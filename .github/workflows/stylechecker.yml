@@ -15,7 +15,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install recent uncrustify
       run: |
-        git clone https://github.com/uncrustify/uncrustify.git
+        # we need this because of a bug introduced in https://github.com/uncrustify/uncrustify/pull/3655
+        git clone https://github.com/uncrustify/uncrustify.git --branch uncrustify-0.75.1
         cd uncrustify && mkdir build && cd build
         cmake .. && sudo make install && cd ../..
     - name: Run uncrustify
