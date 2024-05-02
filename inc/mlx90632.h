@@ -210,6 +210,40 @@ typedef enum mlx90632_meas_e {
 #define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) \
     ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
 
+/** Read raw ambient and object temperature only when measurement data is ready
+ *
+ * Read raw ambient and object temperatures without waiting. This values still need
+ * to be pre-processed via @link mlx90632_preprocess_temp_ambient @endlink and @link
+ * mlx90632_preprocess_temp_object @endlink functions and then processed via @link
+ * mlx90632_calc_temp_ambient @endlink and @link mlx90632_calc_temp_object @endlink
+ * to retrieve values in milliCelsius. This function assumes that measurement cycle
+ * has been triggered and completed via @link mlx90632_start_measurement @endlink or
+ * @link mlx90632_trigger_measurement @endlink or @link mlx90632_wait_for_measurement @endlink,
+ * and channel position has been checked via @link mlx90632_get_channel_position @endlink
+ * in case of continuous mode. This function assumes that measurement cycle has been
+ * triggered and completed via @link mlx90632_start_measurement_burst @endlink, or @link
+ * mlx90632_trigger_measurement_burst @endlink and @link mlx90632_wait_for_measurement_burst
+ * @endlink with sufficient time in between needed to refresh the whole measurement table
+ * in case of burst mode.
+ *
+ * @param[in] channel_position Channel position where new (recently updated) measurement can be found,
+ *                             usually return value of @link mlx90632_start_measurement @endlink or
+ *                             @link mlx90632_wait_for_measurement @endlink or @link
+ *                             mlx90632_get_channel_position @endlink
+ * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
+ * @param[out] object_new_raw Pointer to where new raw object temperature is written
+ * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
+ * @param[out] object_old_raw Pointer to where old raw object temperature is written
+ *
+ * @retval 0 Successfully read both temperatures
+ * @retval <0 Something went wrong. Check errno.h for more details
+ *
+ * @note This function is not blocking!
+ */
+int32_t mlx90632_read_temp_raw_wo_wait(int32_t channel_position,
+                                       int16_t *ambient_new_raw, int16_t *ambient_old_raw,
+                                       int16_t *object_new_raw, int16_t *object_old_raw);
+
 /** Read raw ambient and object temperature
  *
  * Trigger and read raw ambient and object temperatures. This values still need
@@ -368,6 +402,30 @@ double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, doub
  */
 int32_t mlx90632_init(void);
 
+/** Trigger measurement for mlx90632
+ *
+ * Trigger measurement cycle. It does not read anything, just triggers measurement.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval 0 Successfully triggered and started measuremeent
+ *
+ * @note This function is not blocking!
+ */
+int32_t mlx90632_trigger_measurement(void);
+
+/** Wait for measurement to complete for mlx90632
+ *
+ * Wait for measurement data to be ready. It does not read anything, just completes measurement.
+ * This function assumes that measurement cycle has been triggered via @link
+ * mlx90632_trigger_measurement @endlink.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval >=0 Channel position where new (recently updated) measurement can be found
+ *
+ * @note This function is using usleep so it is blocking!
+ */
+int32_t mlx90632_wait_for_measurement(void);
+
 /** Trigger start measurement for mlx90632
  *
  * Trigger measurement cycle and wait for data to be ready. It does not read anything, just triggers and completes.
@@ -377,7 +435,7 @@ int32_t mlx90632_init(void);
  *
  * @note This function is using usleep so it is blocking!
  */
-int mlx90632_start_measurement(void);
+int32_t mlx90632_start_measurement(void);
 
 /** Set emissivity which is retained in single variable.
  *
@@ -390,6 +448,33 @@ void mlx90632_set_emissivity(double value);
 /** Read value of emissivity
  */
 double mlx90632_get_emissivity(void);
+
+/** Trigger burst measurement for mlx90632
+ *
+ * Trigger a single measurement cycle. It does not read anything, just triggers measurement.
+ * The SOB bit is set so that the complete measurement table is re-freshed.
+ *
+ * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurement has started.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval 0 Successfully triggered and started measuremeent
+ *
+ * @note This function is not blocking!
+ */
+int32_t mlx90632_trigger_measurement_burst(void);
+
+/** Wait for burst measurement to complete for mlx90632
+ *
+ * Wait for measurement data to be ready. It does not read anything, just completes measurement.
+ * This function assumes that burst measurement cycle has been triggered via @link
+ * mlx90632_trigger_measurement_burst @endlink.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval 0 New data is available and waiting to be processed
+ * 
+ * @note This function is using usleep so it is blocking!
+ */
+int32_t mlx90632_wait_for_measurement_burst(void);
 
 /** Trigger start of burst measurement for mlx90632
  *
@@ -453,11 +538,18 @@ int32_t mlx90632_set_refresh_rate(mlx90632_meas_t measRate);
  */
 mlx90632_meas_t mlx90632_get_refresh_rate(void);
 
+/** Gets the channel position where new (recently updated) measurement can be found
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval >=0 Channel position where new (recently updated) measurement can be found
+ */
+int32_t mlx90632_get_channel_position(void);
+
 ///@}
 
 #ifdef TEST
 int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw);
-int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
+int32_t mlx90632_read_temp_object_raw(int32_t channel_position,
                                       int16_t *object_new_raw, int16_t *object_old_raw);
 
 #endif
