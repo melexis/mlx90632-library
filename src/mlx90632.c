@@ -173,7 +173,10 @@ STATIC int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t 
  * @param[in] channel_position Channel position where new (recently updated) measurement can be found,
  *                             usually return value of @link mlx90632_start_measurement @endlink or
  *                             @link mlx90632_wait_for_measurement @endlink or @link
- *                             mlx90632_get_channel_position @endlink
+ *                             mlx90632_get_channel_position @endlink in case of continuous mode,
+ *                             2 in case of burst mode, and return value of @link
+ *                             mlx90632_wait_for_measurement @endlink or @link
+ *                             mlx90632_get_channel_position @endlink in case of single mode
  * @param[out] *object_new_raw Pointer to memory location where average of new object values from sensor is stored
  * @param[out] *object_old_raw Pointer to memory location where average of old object values from sensor is stored
  *
@@ -647,6 +650,26 @@ int32_t mlx90632_start_measurement_burst(void)
     return ret;
 }
 
+int32_t mlx90632_trigger_measurement_single(void)
+{
+    int32_t ret;
+    uint16_t reg;
+
+    // Clear NEW_DATA flag
+    ret = mlx90632_trigger_measurement();
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
+    if (ret < 0)
+        return ret;
+
+    reg |= MLX90632_START_SINGLE_MEAS;
+
+    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg);
+
+    return ret;
+}
 
 STATIC int32_t mlx90632_unlock_eeporm()
 {

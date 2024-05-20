@@ -38,7 +38,11 @@
  * triggered and completed via @link mlx90632_start_measurement_burst @endlink, or @link
  * mlx90632_trigger_measurement_burst @endlink and @link mlx90632_wait_for_measurement_burst
  * @endlink with sufficient time in between needed to refresh the whole measurement table
- * in case of burst mode.
+ * in case of burst mode. This function assumes that measurement cycle has been
+ * triggered and completed via @link mlx90632_trigger_measurement_single @endlink and
+ * @link mlx90632_wait_for_measurement @endlink with sufficient time in between needed to
+ * refresh a single measurement in case of single mode (must be triggered and completed
+ * three times after power-up before calling this function).
  *
  * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
  * @param[out] object_new_raw Pointer to where new raw object temperature is written

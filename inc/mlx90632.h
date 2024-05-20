@@ -163,6 +163,8 @@ typedef enum mlx90632_meas_e {
 /* Start of burst measurement options */
 #define MLX90632_START_BURST_MEAS MLX90632_CFG_SOB(1)
 #define MLX90632_BURST_MEAS_NOT_PENDING MLX90632_CFG_SOB(0)
+/* Start of single measurement option */
+#define MLX90632_START_SINGLE_MEAS (1 << MLX90632_CFG_SOC_SHIFT)
 
 /* Device status register - volatile */
 #define MLX90632_REG_STATUS 0x3fff /**< Device status register */
@@ -224,12 +226,19 @@ typedef enum mlx90632_meas_e {
  * triggered and completed via @link mlx90632_start_measurement_burst @endlink, or @link
  * mlx90632_trigger_measurement_burst @endlink and @link mlx90632_wait_for_measurement_burst
  * @endlink with sufficient time in between needed to refresh the whole measurement table
- * in case of burst mode.
+ * in case of burst mode. This function assumes that measurement cycle has been
+ * triggered and completed via @link mlx90632_trigger_measurement_single @endlink and
+ * @link mlx90632_wait_for_measurement @endlink with sufficient time in between needed to
+ * refresh a single measurement in case of single mode (must be triggered and completed
+ * two times after power-up before calling this function).
  *
  * @param[in] channel_position Channel position where new (recently updated) measurement can be found,
  *                             usually return value of @link mlx90632_start_measurement @endlink or
  *                             @link mlx90632_wait_for_measurement @endlink or @link
- *                             mlx90632_get_channel_position @endlink
+ *                             mlx90632_get_channel_position @endlink in case of continuous mode,
+ *                             2 in case of burst mode, and return value of @link
+ *                             mlx90632_wait_for_measurement @endlink or @link
+ *                             mlx90632_get_channel_position @endlink in case of single mode
  * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
  * @param[out] object_new_raw Pointer to where new raw object temperature is written
  * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
@@ -417,7 +426,7 @@ int32_t mlx90632_trigger_measurement(void);
  *
  * Wait for measurement data to be ready. It does not read anything, just completes measurement.
  * This function assumes that measurement cycle has been triggered via @link
- * mlx90632_trigger_measurement @endlink.
+ * mlx90632_trigger_measurement @endlink or @link mlx90632_trigger_measurement_single @endlink.
  *
  * @retval <0 Something failed. Check errno.h for more information
  * @retval >=0 Channel position where new (recently updated) measurement can be found
@@ -451,7 +460,7 @@ double mlx90632_get_emissivity(void);
 
 /** Trigger burst measurement for mlx90632
  *
- * Trigger a single measurement cycle. It does not read anything, just triggers measurement.
+ * Trigger a full measurement cycle. It does not read anything, just triggers measurement.
  * The SOB bit is set so that the complete measurement table is re-freshed.
  *
  * @note The SOB bit is cleared internally by the mlx90632 immediately after the measurement has started.
@@ -491,6 +500,20 @@ int32_t mlx90632_wait_for_measurement_burst(void);
  * you might also need to take care of Watch Dog.
  */
 int32_t mlx90632_start_measurement_burst(void);
+
+/** Trigger single measurement for mlx90632
+ *
+ * Trigger a single measurement cycle. It does not read anything, just triggers measurement.
+ * The SOC bit is set so that the single measurement is triggered.
+ *
+ * @note The SOC bit is cleared internally by the mlx90632 immediately after the measurement has started.
+ *
+ * @retval <0 Something failed. Check errno.h for more information
+ * @retval 0 Successfully triggered and started measuremeent
+ *
+ * @note This function is not blocking!
+ */
+int32_t mlx90632_trigger_measurement_single(void);
 
 /** Reads the refresh rate and calculates the time needed for a single measurment from the EEPROM settings.
  *
