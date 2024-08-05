@@ -64,8 +64,8 @@ int32_t mlx90632_read_temp_raw_extended_wo_wait(int16_t *ambient_new_raw, int16_
  * to retrieve values in milliCelsius
  *
  * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
- * @param[out] object_new_raw Pointer to where new raw object temperature is written
  * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
+ * @param[out] object_new_raw Pointer to where new raw object temperature is written
  *
  * @retval 0 Successfully read both temperatures
  * @retval <0 Something went wrong. Check errno.h for more details
@@ -81,8 +81,8 @@ int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambie
  * to retrieve values in milliCelsius
  *
  * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
- * @param[out] object_new_raw Pointer to where new raw object temperature is written
  * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
+ * @param[out] object_new_raw Pointer to where new raw object temperature is written
  *
  * @retval 0 Successfully read both temperatures
  * @retval <0 Something went wrong. Check errno.h for more details
