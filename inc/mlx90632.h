@@ -129,7 +129,7 @@ typedef enum mlx90632_meas_e {
 #define MLX90632_EE_REFRESH_RATE_START 10 /**< Refresh Rate Start bit */
 #define MLX90632_EE_REFRESH_RATE_SHIFT 8 /**< Refresh Rate shift */
 #define MLX90632_EE_REFRESH_RATE_MASK GENMASK(MLX90632_EE_REFRESH_RATE_START, MLX90632_EE_REFRESH_RATE_SHIFT) /**< Refresh Rate Mask */
-#define MLX90632_EE_REFRESH_RATE(ee_val) (ee_val & MLX90632_EE_REFRESH_RATE_MASK) /**< Extract the Refresh Rate bits*/
+#define MLX90632_EE_REFRESH_RATE(ee_val) (ee_val & MLX90632_EE_REFRESH_RATE_MASK)    /**< Extract the Refresh Rate bits*/
 #define MLX90632_REFRESH_RATE(ee_val) (MLX90632_EE_REFRESH_RATE(ee_val) >> MLX90632_EE_REFRESH_RATE_SHIFT) /**< Extract Refresh Rate from ee register */
 #define MLX90632_REFRESH_RATE_STATUS(mlx90632_meas) (mlx90632_meas << MLX90632_EE_REFRESH_RATE_SHIFT)  /**< Extract the Refresh Rate bits */
 
@@ -141,10 +141,10 @@ typedef enum mlx90632_meas_e {
 #define   MLX90632_CFG_SOC_SHIFT 3 /**< Start measurement in step mode */
 #define   MLX90632_CFG_SOC_MASK BIT(MLX90632_CFG_SOC_SHIFT)
 #define   MLX90632_CFG_PWR_MASK GENMASK(2, 1) /**< PowerMode Mask */
-#define   MLX90632_CFG_PWR(ctrl_val) (ctrl_val & MLX90632_CFG_PWR_MASK) /**< Extract the PowerMode bits*/
+#define   MLX90632_CFG_PWR(ctrl_val) (ctrl_val & MLX90632_CFG_PWR_MASK)    /**< Extract the PowerMode bits*/
 #define   MLX90632_CFG_MTYP_SHIFT 4 /**< Meas select start shift */
 #define   MLX90632_CFG_MTYP_MASK GENMASK(8, MLX90632_CFG_MTYP_SHIFT) /**< Meas select Mask */
-#define   MLX90632_CFG_MTYP(ctrl_val) (ctrl_val & MLX90632_CFG_MTYP_MASK) /**< Extract the MeasType bits*/
+#define   MLX90632_CFG_MTYP(ctrl_val) (ctrl_val & MLX90632_CFG_MTYP_MASK)    /**< Extract the MeasType bits*/
 #define   MLX90632_CFG_SOB_SHIFT 11 /**< Start burst measurement in step mode */
 #define   MLX90632_CFG_SOB_MASK BIT(MLX90632_CFG_SOB_SHIFT)
 #define   MLX90632_CFG_SOB(ctrl_val) (ctrl_val << MLX90632_CFG_SOB_SHIFT)
@@ -363,7 +363,7 @@ double mlx90632_calc_temp_object_reflected(int32_t object, int32_t ambient, doub
  * Please confirm that i2c read (16bit) is functioning as expected.
  *
  * @retval 0 Successfully initialized MLX90632 driver, extended range measurement not supported
- * @retval @link ERANGE @endlink Successfully initialized MLX90632 driver, extended range measurement is supported
+ * @retval ERANGE Successfully initialized MLX90632 driver, extended range measurement is supported
  * @retval <0 Something went wrong. Consult errno.h for more details.
  */
 int32_t mlx90632_init(void);
