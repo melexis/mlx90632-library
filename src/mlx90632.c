@@ -46,8 +46,8 @@ static const char mlx90632version[] __attribute__((used)) = { VERSION };
 
 int32_t mlx90632_trigger_measurement(void)
 {
-    int32_t ret;
     uint16_t reg_status;
+    int32_t ret;
 
     ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
     if (ret < 0)
@@ -60,9 +60,9 @@ int32_t mlx90632_trigger_measurement(void)
 
 int32_t mlx90632_wait_for_measurement(void)
 {
-    int32_t ret;
-    uint16_t reg_status;
     int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
+    uint16_t reg_status;
+    int32_t ret;
 
     while (tries-- > 0)
     {
@@ -591,8 +591,8 @@ int32_t mlx90632_calculate_dataset_ready_time(void)
 
 int32_t mlx90632_trigger_measurement_burst(void)
 {
-    int32_t ret;
     uint16_t reg;
+    int32_t ret;
 
     ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
     if (ret < 0)
@@ -607,9 +607,9 @@ int32_t mlx90632_trigger_measurement_burst(void)
 
 int32_t mlx90632_wait_for_measurement_burst(void)
 {
-    int32_t ret;
-    uint16_t reg_status;
     int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
+    uint16_t reg_status;
+    int32_t ret;
 
     while (tries-- > 0)
     {
@@ -652,8 +652,8 @@ int32_t mlx90632_start_measurement_burst(void)
 
 int32_t mlx90632_trigger_measurement_single(void)
 {
-    int32_t ret;
     uint16_t reg;
+    int32_t ret;
 
     // Clear NEW_DATA flag
     ret = mlx90632_trigger_measurement();
@@ -768,8 +768,8 @@ mlx90632_meas_t mlx90632_get_refresh_rate(void)
 
 int32_t mlx90632_get_channel_position(void)
 {
-    int32_t ret;
     uint16_t reg_status;
+    int32_t ret;
 
     ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
     if (ret < 0)
