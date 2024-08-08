@@ -159,6 +159,7 @@ void test_dsp_object(void)
 void test_dsp_object_reflected(void)
 {
     TEST_ASSERT_DOUBLE_WITHIN(0.01, dspv5_object_helper(609, 611, 22454, 23030), dspv5_object_reflected_helper(609, 611, 22454, 23030, 48.724));
+
     mlx90632_set_emissivity(0.1);
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 98.141, dspv5_object_reflected_helper(609, 611, 22454, 23030, 49.66));
     TEST_ASSERT_DOUBLE_WITHIN(0.01, 143.956, dspv5_object_reflected_helper(609, 611, 22454, 23030, 40.00));
@@ -174,6 +175,7 @@ void test_dsp_object_extended(void)
     TEST_ASSERT_DOUBLE_WITHIN(0.02, 194.599, object_extended_helper(13550, 22454, 23030, 25.0));
     TEST_ASSERT_DOUBLE_WITHIN(0.02, 267.609, object_extended_helper(26900, 22454, 23030, 25.0));
     TEST_ASSERT_DOUBLE_WITHIN(0.02, 268.508, object_extended_helper(27100, 22454, 23030, 25.0));
+
     mlx90632_set_emissivity(0.1);
     TEST_ASSERT_DOUBLE_WITHIN(0.02, 98.141, object_extended_helper(305, 22454, 23030, 49.66));
     TEST_ASSERT_DOUBLE_WITHIN(0.02, 143.956, object_extended_helper(305, 22454, 23030, 40.00));
