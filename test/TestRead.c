@@ -53,6 +53,119 @@ void tearDown(void)
 {
 }
 
+/** Test trigger measurement.
+ */
+void test_trigger_measurement_success(void)
+{
+    uint16_t reg_status_mock = 0x0087; // cycle position 1 & data ready
+
+    // Trigger measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & (~MLX90632_STAT_DATA_RDY), 0);
+
+    TEST_ASSERT_EQUAL_INT32(0, mlx90632_trigger_measurement());
+}
+
+/** Test different failure paths when triggering measurement.
+ */
+void test_trigger_measurement_errors(void)
+{
+    uint16_t reg_status_mock = 0x0087; // cycle position 1 & data ready
+
+    // Trigger measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement());
+
+    // Trigger measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & (~MLX90632_STAT_DATA_RDY), -EPERM);
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement());
+}
+
+/** Test wait for measurement with data ready.
+ */
+void test_wait_for_measurement_success(void)
+{
+    uint16_t reg_status_mock = 0x0087; // cycle position 1 & data ready
+
+    // Wait for measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    TEST_ASSERT_EQUAL_INT32(1, mlx90632_wait_for_measurement());
+}
+
+/** Test wait for measurement function, if data is ready and if it is not it waits one usleep period before retry.
+ *
+ * First we simulate data not ready with bit0 not set. After one period we flip the bit0 to 1 to indicate
+ * data ready and wait for measurement should complete with success.
+ */
+void test_wait_for_measurement_one_wait(void)
+{
+    uint16_t reg_status_mock = 0x0C86; // cycle position 1 & data not ready
+    uint16_t reg_status_mock1 = 0x0087; // cycle position 1 & data ready
+
+    // Wait for measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    usleep_Expect(10000, 11000);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock1);
+
+    TEST_ASSERT_EQUAL_INT32(1, mlx90632_wait_for_measurement());
+}
+
+/** Test failure path when waiting for measurement.
+ */
+void test_wait_for_measurement_error(void)
+{
+    uint16_t reg_status_mock = 0x0087; // cycle position 1 & data ready
+
+    // Wait for measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_wait_for_measurement());
+}
+
+/** Test sensor timeouts while waiting for measurement.
+ *
+ * If this happens in real life it means that after 100 tries sensor still did not indicate data ready, which probably
+ * points to much larger problem than a simple timeout. Timeout is only valid if usleep is a lot shorter than default
+ * values
+ */
+void test_wait_for_measurement_timeout(void)
+{
+    uint16_t reg_status_mock = 0x0C86; // cycle position 1 & data not ready
+    int i;
+
+    for (i = 0; i < MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES; ++i)
+    {
+        // Wait for measurement expectations
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+        usleep_Expect(10000, 11000);
+    }
+
+    TEST_ASSERT_EQUAL_INT32(-ETIMEDOUT, mlx90632_wait_for_measurement());
+}
+
 /** Test start measurement with data ready.
  */
 void test_start_measurement_success(void)
@@ -70,7 +183,7 @@ void test_start_measurement_success(void)
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
     mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
 
-    TEST_ASSERT_EQUAL_INT(1, mlx90632_start_measurement());
+    TEST_ASSERT_EQUAL_INT32(1, mlx90632_start_measurement());
 }
 
 /** Test start measurement function, if data is ready and if it is not it waits one usleep period before retry.
@@ -100,7 +213,7 @@ void test_start_measurement_one_wait(void)
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
     mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock1);
 
-    TEST_ASSERT_EQUAL_INT(1, mlx90632_start_measurement());
+    TEST_ASSERT_EQUAL_INT32(1, mlx90632_start_measurement());
 }
 
 /** Test different failure paths in start_measurement */
@@ -113,7 +226,7 @@ void test_start_measurement_busy_i2c(void)
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
     mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
 
-    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_start_measurement());
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_start_measurement());
 
     // Start measurement expectations
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
@@ -122,7 +235,7 @@ void test_start_measurement_busy_i2c(void)
 
     mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & (~MLX90632_STAT_DATA_RDY), -EPERM);
 
-    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_start_measurement());
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_start_measurement());
 
     // Start measurement expectations
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
@@ -134,7 +247,7 @@ void test_start_measurement_busy_i2c(void)
     mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
     mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
 
-    TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_start_measurement());
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_start_measurement());
 }
 
 /** Test sensor timeouts while start_measure.
@@ -168,9 +281,116 @@ void test_start_measurement_timeout(void)
         usleep_Expect(10000, 11000);
     }
 
-    TEST_ASSERT_EQUAL_INT(-ETIMEDOUT, mlx90632_start_measurement());
+    TEST_ASSERT_EQUAL_INT32(-ETIMEDOUT, mlx90632_start_measurement());
 }
 
+
+/** Test read temperature from sensor without waiting procedure.
+ *
+ * Read ambient and object raw values considering channel 1 as new. Channel 2 values are read as old,
+ * while channel 1 values are read as new.
+ */
+void test_read_temp_raw_wo_wait_ch1_success(void)
+{
+    int16_t ambient_new_mock = 22454;
+    int16_t ambient_old_mock = 23030;
+    int16_t object_new_mock = 150;
+    int16_t object_old_mock = 150;
+
+    // Read Ambient raw expectations (based on cycle position 1)
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(1), (uint16_t*)&ambient_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(2), (uint16_t*)&ambient_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_old_mock);
+
+    // Read Object raw expectations (based on cycle position 1)
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_2(1), (uint16_t*)&object_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(1), (uint16_t*)&object_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_2(2), (uint16_t*)&object_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_old_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(2), (uint16_t*)&object_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_old_mock);
+
+    TEST_ASSERT_EQUAL_INT32(0, mlx90632_read_temp_raw_wo_wait(1, &ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
+
+    // Confirm all values are as expected
+    TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_new_raw);
+    TEST_ASSERT_EQUAL_INT16(ambient_old_mock, ambient_old_raw);
+    TEST_ASSERT_EQUAL_INT16(object_new_mock, object_new_raw);
+    TEST_ASSERT_EQUAL_INT16(object_old_mock, object_old_raw);
+}
+
+/** Test read temperature from sensor without waiting procedure.
+ *
+ * Read ambient and object raw values considering channel 2 as new. Channel 1 values are read as old,
+ * while channel 2 values are read as new.
+ */
+void test_read_temp_raw_wo_wait_ch2_success(void)
+{
+    int16_t ambient_new_mock = 22454;
+    int16_t ambient_old_mock = 23030;
+    int16_t object_new_mock = 150;
+    int16_t object_old_mock = 150;
+
+    // Read Ambient raw expectations (based on cycle position 2)
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(1), (uint16_t*)&ambient_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(2), (uint16_t*)&ambient_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_old_mock);
+
+    // Read Object raw expectations (based on cycle position 2)
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_2(2), (uint16_t*)&object_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(2), (uint16_t*)&object_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_2(1), (uint16_t*)&object_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_old_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(1), (uint16_t*)&object_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_old_mock);
+
+    TEST_ASSERT_EQUAL_INT32(0, mlx90632_read_temp_raw_wo_wait(2, &ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
+
+    // Confirm all values are as expected
+    TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_new_raw);
+    TEST_ASSERT_EQUAL_INT16(ambient_old_mock, ambient_old_raw);
+    TEST_ASSERT_EQUAL_INT16(object_new_mock, object_new_raw);
+    TEST_ASSERT_EQUAL_INT16(object_old_mock, object_old_raw);
+}
+
+/** Test failure path when reading temperature from sensor without waiting procedure.
+ */
+void test_read_temp_raw_wo_wait_error(void)
+{
+    int16_t ambient_new_mock = 22454;
+
+    // Read Ambient raw expectations (based on cycle position 1)
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(1), (uint16_t*)&ambient_new_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_read_temp_raw_wo_wait(1, &ambient_new_raw, &ambient_old_raw, &object_new_raw, &object_old_raw));
+}
 
 /** Test whole start and read temperature from sensor procedure.
  *
@@ -748,6 +968,91 @@ void test_read_object_values_extended_errors(void)
     TEST_ASSERT_EQUAL_INT(-EINVAL, mlx90632_read_temp_object_raw_extended(&object_new_raw));
 }
 
+/** Test read extended temperature from sensor without waiting procedure.
+ */
+void test_read_temp_raw_extended_wo_wait_success(void)
+{
+    int16_t ambient_new_mock = 22454;
+    int16_t ambient_old_mock = 23030;
+    int16_t object_mock_l1 = 250;
+    int16_t object_mock_l2 = 260;
+    int16_t object_mock_b1 = -25;
+    int16_t object_mock_b2 = -35;
+    int16_t object_mock_v1 = 4;
+    int16_t object_mock_v2 = -2;
+
+    // Read Ambient raw expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(17), (uint16_t*)&ambient_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(18), (uint16_t*)&ambient_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_old_mock);
+
+    // Read Object raw expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(17), (uint16_t*)&object_mock_l1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_mock_l1);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_2(17), (uint16_t*)&object_mock_b1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_mock_b1);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(18), (uint16_t*)&object_mock_b2, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_mock_b2);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_2(18), (uint16_t*)&object_mock_l2, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_mock_l2);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(19), (uint16_t*)&object_mock_v1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_mock_v1);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_2(19), (uint16_t*)&object_mock_v2, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&object_mock_v2);
+
+    TEST_ASSERT_EQUAL_INT32(0, mlx90632_read_temp_raw_extended_wo_wait(&ambient_new_raw, &ambient_old_raw, &object_new_raw));
+
+    // Confirm all values are as expected
+    TEST_ASSERT_EQUAL_INT16(ambient_new_mock, ambient_new_raw);
+    TEST_ASSERT_EQUAL_INT16(ambient_old_mock, ambient_old_raw);
+    TEST_ASSERT_EQUAL_INT16(287, object_new_raw);
+}
+
+/** Test different failure paths when reading extended temperature from sensor without waiting procedure.
+ */
+void test_read_temp_raw_extended_wo_wait_errors(void)
+{
+    int16_t ambient_new_mock = 22454;
+    int16_t ambient_old_mock = 23030;
+    int16_t object_mock_l1 = 250;
+
+    // Read Ambient raw expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(17), (uint16_t*)&ambient_new_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_read_temp_raw_extended_wo_wait(&ambient_new_raw, &ambient_old_raw, &object_new_raw));
+
+    // Read Ambient raw expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(17), (uint16_t*)&ambient_new_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_new_mock);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_3(18), (uint16_t*)&ambient_old_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value((uint16_t*)&ambient_old_mock);
+
+    // Read Object raw expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_RAM_1(17), (uint16_t*)&object_mock_l1, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_read_temp_raw_extended_wo_wait(&ambient_new_raw, &ambient_old_raw, &object_new_raw));
+}
+
 /** Test whole start and read extended temperature from sensor procedure.
  *
  * Start measurement which returns channel 19 as the last measurement, then read ambient and object raw values.
@@ -1042,6 +1347,95 @@ void test_read_temp_raw_extended_errors(void)
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_read_temp_raw_extended(&ambient_new_raw, &ambient_old_raw, &object_new_raw));
 }
 
+/** Test trigger burst measurement.
+ */
+void test_trigger_measurement_burst_success(void)
+{
+    uint16_t reg_ctrl_mock = 0x0002; // medical sleeping step meas selected
+
+    // Trigger burst measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock | MLX90632_START_BURST_MEAS, 0);
+
+    TEST_ASSERT_EQUAL_INT32(0, mlx90632_trigger_measurement_burst());
+}
+
+/** Test different failure paths when triggering burst measurement.
+ */
+void test_trigger_measurement_burst_errors(void)
+{
+    uint16_t reg_ctrl_mock = 0x0002; // medical sleeping step meas selected
+
+    // Trigger burst measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement_burst());
+
+    // Trigger burst measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock | MLX90632_START_BURST_MEAS, -EPERM);
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement_burst());
+}
+
+/** Test wait for burst measurement with data ready.
+ */
+void test_wait_for_measurement_burst_success(void)
+{
+    uint16_t reg_status_mock = 0x000B;  // cycle position 2 & data ready & device not busy
+
+    // Wait for burst measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    TEST_ASSERT_EQUAL_INT32(0, mlx90632_wait_for_measurement_burst());
+}
+
+/** Test failure path when waiting for burst measurement.
+ */
+void test_wait_for_measurement_burst_error(void)
+{
+    uint16_t reg_status_mock = 0x000B;  // cycle position 2 & data ready & device not busy
+
+    // Wait for burst measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_wait_for_measurement_burst());
+}
+
+/** Test sensor timeouts while while waiting for burst measurement.
+ *
+ * If this happens in real life it means that after some tries sensor still did not indicate data ready, which probably
+ * points to much larger problem than a simple timeout. Timeout is only valid if usleep is a lot shorter than default
+ * values
+ */
+void test_wait_for_measurement_burst_timeout(void)
+{
+    uint16_t reg_status_mock = 0x0C06; // cycle position 1 & device busy
+    int i;
+
+    for (i = 0; i < MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES; ++i)
+    {
+        // Wait for measurement expectations
+        mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+        mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+        mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+        usleep_Expect(10000, 11000);
+    }
+
+    TEST_ASSERT_EQUAL_INT32(-ETIMEDOUT, mlx90632_wait_for_measurement_burst());
+}
+
 /** Test start sleeping step measurement.
  */
 void test_start_measurement_burst_success(void)
@@ -1191,6 +1585,79 @@ void test_start_measurement_burst_timeout(void)
     }
 
     TEST_ASSERT_EQUAL_INT(-ETIMEDOUT, mlx90632_start_measurement_burst());
+}
+
+/** Test trigger single measurement.
+ */
+void test_trigger_measurement_single_success(void)
+{
+    uint16_t reg_status_mock = 0x0087; // cycle position 1 & data ready
+    uint16_t reg_ctrl_mock = 0x0002; // medical sleeping step meas selected
+
+    // Trigger single measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & (~MLX90632_STAT_DATA_RDY), 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock | MLX90632_START_SINGLE_MEAS, 0);
+
+    TEST_ASSERT_EQUAL_INT32(0, mlx90632_trigger_measurement_single());
+}
+
+/** Test failure path when triggering single measurement.
+ */
+void test_trigger_measurement_single_errors(void)
+{
+    uint16_t reg_status_mock = 0x0087; // cycle position 1 & data ready
+    uint16_t reg_ctrl_mock = 0x0002; // medical sleeping step meas selected
+
+    // Trigger single measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement_single());
+
+    // Trigger single measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & (~MLX90632_STAT_DATA_RDY), -EPERM);
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement_single());
+
+    // Trigger single measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & (~MLX90632_STAT_DATA_RDY), 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement_single());
+
+    // Trigger single measurement expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_STATUS, reg_status_mock & (~MLX90632_STAT_DATA_RDY), 0);
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_CTRL, &reg_ctrl_mock, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_ctrl_mock);
+
+    mlx90632_i2c_write_ExpectAndReturn(MLX90632_REG_CTRL, reg_ctrl_mock | MLX90632_START_SINGLE_MEAS, -EPERM);
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_trigger_measurement_single());
 }
 
 /** Test whole start and read extended temperature in sleeping step mode from sensor procedure.
@@ -1635,6 +2102,62 @@ void test_calculate_dataset_ready_time_extended_errors(void)
     mlx90632_i2c_read_ReturnThruPtr_value(&ext_meas3_mock);
 
     TEST_ASSERT_EQUAL_INT(-EPERM, mlx90632_calculate_dataset_ready_time());
+}
+
+/** Test get channel position.
+ */
+void test_get_channel_position_success(void)
+{
+    uint16_t reg_status_mock_med1 = 0x0087; // cycle position 1 & data ready
+    uint16_t reg_status_mock_med2 = 0x008B; // cycle position 2 & data ready
+    uint16_t reg_status_mock_ext1 = 0x00C5; // cycle position 17 & data ready
+    uint16_t reg_status_mock_ext2 = 0x00C9; // cycle position 18 & data ready
+    uint16_t reg_status_mock_ext3 = 0x00CF; // cycle position 19 & data ready
+
+    // Read medical measurement type
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock_med1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock_med1);
+
+    TEST_ASSERT_EQUAL_INT32(1, mlx90632_get_channel_position());
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock_med2, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock_med2);
+
+    TEST_ASSERT_EQUAL_INT32(2, mlx90632_get_channel_position());
+
+    // Read extended measurement type
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock_ext1, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock_ext1);
+
+    TEST_ASSERT_EQUAL_INT32(17, mlx90632_get_channel_position());
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock_ext2, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock_ext2);
+
+    TEST_ASSERT_EQUAL_INT32(18, mlx90632_get_channel_position());
+
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock_ext3, 0);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+    mlx90632_i2c_read_ReturnThruPtr_value(&reg_status_mock_ext3);
+
+    TEST_ASSERT_EQUAL_INT32(19, mlx90632_get_channel_position());
+}
+
+/** Test failure path when getting channel position.
+ */
+void test_get_channel_position_error(void)
+{
+    uint16_t reg_status_mock = 0x0087; // cycle position 1 & data ready
+
+    // Get channel position expectations
+    mlx90632_i2c_read_ExpectAndReturn(MLX90632_REG_STATUS, &reg_status_mock, -EPERM);
+    mlx90632_i2c_read_IgnoreArg_value(); // Ignore input of mock since we use it as output
+
+    TEST_ASSERT_EQUAL_INT32(-EPERM, mlx90632_get_channel_position());
 }
 
 void test_set_meas_type_success(void)
