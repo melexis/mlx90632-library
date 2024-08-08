@@ -61,7 +61,7 @@
 
 /* BIT, GENMASK and ARRAY_SIZE macros are imported from kernel */
 #ifndef BIT
-#define BIT(x)(1UL << (x))
+#define BIT(x)(1U << (x))
 #endif
 #ifndef GENMASK
 #ifndef BITS_PER_LONG
@@ -69,7 +69,7 @@
 #define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
 #endif
 #define GENMASK(h, l) \
-    (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
+    ((((1U << h) - 1) | (1U << h)) & ~((1U << l) - 1))
 #endif
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0])) /**< Return number of elements in array */
