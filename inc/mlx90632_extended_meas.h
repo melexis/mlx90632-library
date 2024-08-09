@@ -24,6 +24,37 @@
 #ifndef _MLX90632_EXTENDED_MEAS_LIB_
 #define _MLX90632_EXTENDED_MEAS_LIB_
 
+/** Read raw ambient and object temperature for extended range only when measurement data is ready
+ *
+ * Read raw ambient and object temperatures without waiting. This values still need
+ * to be pre-processed via @link mlx90632_preprocess_temp_ambient_extended @endlink and @link
+ * mlx90632_preprocess_temp_object_extended @endlink functions and then processed via @link
+ * mlx90632_calc_temp_ambient_extended @endlink and @link mlx90632_calc_temp_object_extended @endlink
+ * to retrieve values in milliCelsius. This function assumes that measurement cycle
+ * has been triggered and completed via @link mlx90632_start_measurement @endlink or
+ * @link mlx90632_trigger_measurement @endlink or @link mlx90632_wait_for_measurement @endlink,
+ * and channel position has been checked via @link mlx90632_get_channel_position @endlink
+ * in case of continuous mode. This function assumes that measurement cycle has been
+ * triggered and completed via @link mlx90632_start_measurement_burst @endlink, or @link
+ * mlx90632_trigger_measurement_burst @endlink and @link mlx90632_wait_for_measurement_burst
+ * @endlink with sufficient time in between needed to refresh the whole measurement table
+ * in case of burst mode. This function assumes that measurement cycle has been
+ * triggered and completed via @link mlx90632_trigger_measurement_single @endlink and
+ * @link mlx90632_wait_for_measurement @endlink with sufficient time in between needed to
+ * refresh a single measurement in case of single mode (must be triggered and completed
+ * three times after power-up before calling this function).
+ *
+ * @param[out] ambient_new_raw Pointer to where new raw ambient temperature is written
+ * @param[out] object_new_raw Pointer to where new raw object temperature is written
+ * @param[out] ambient_old_raw Pointer to where old raw ambient temperature is written
+ *
+ * @retval 0 Successfully read both temperatures
+ * @retval <0 Something went wrong. Check errno.h for more details
+ *
+ * @note This function is not blocking!
+ */
+int32_t mlx90632_read_temp_raw_extended_wo_wait(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw);
+
 /** Read raw ambient and object temperature for extended range
  *
  * Trigger and read raw ambient and object temperatures. This values still need

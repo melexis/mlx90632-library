@@ -130,9 +130,23 @@ STATIC int32_t mlx90632_read_temp_object_raw_extended(int16_t *object_new_raw)
     return ret;
 }
 
+int32_t mlx90632_read_temp_raw_extended_wo_wait(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw)
+{
+    /** Read new and old **ambient** values from sensor */
+    int32_t ret = mlx90632_read_temp_ambient_raw_extended(ambient_new_raw, ambient_old_raw);
+
+    if (ret < 0)
+        return ret;
+
+    /** Read new **object** value from sensor */
+    ret = mlx90632_read_temp_object_raw_extended(object_new_raw);
+
+    return ret;
+}
+
 int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw)
 {
-    int32_t ret, start_measurement_ret;
+    int32_t start_measurement_ret;
     int tries = 3;
 
     // trigger and wait for measurement to complete
@@ -152,35 +166,20 @@ int32_t mlx90632_read_temp_raw_extended(int16_t *ambient_new_raw, int16_t *ambie
         return -ETIMEDOUT;
     }
 
-    /** Read new and old **ambient** values from sensor */
-    ret = mlx90632_read_temp_ambient_raw_extended(ambient_new_raw, ambient_old_raw);
-    if (ret < 0)
-        return ret;
-
-    /** Read new **object** value from sensor */
-    ret = mlx90632_read_temp_object_raw_extended(object_new_raw);
-
-    return ret;
+    /** Read raw ambient and object temperature for extended range */
+    return mlx90632_read_temp_raw_extended_wo_wait(ambient_new_raw, ambient_old_raw, object_new_raw);
 }
 
 int32_t mlx90632_read_temp_raw_extended_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw, int16_t *object_new_raw)
 {
-    int32_t ret, start_measurement_ret;
-
     // trigger and wait for measurement to complete
-    start_measurement_ret = mlx90632_start_measurement_burst();
+    int32_t start_measurement_ret = mlx90632_start_measurement_burst();
+
     if (start_measurement_ret < 0)
         return start_measurement_ret;
 
-    /** Read new and old **ambient** values from sensor */
-    ret = mlx90632_read_temp_ambient_raw_extended(ambient_new_raw, ambient_old_raw);
-    if (ret < 0)
-        return ret;
-
-    /** Read new **object** value from sensor */
-    ret = mlx90632_read_temp_object_raw_extended(object_new_raw);
-
-    return ret;
+    /** Read raw ambient and object temperature for extended range */
+    return mlx90632_read_temp_raw_extended_wo_wait(ambient_new_raw, ambient_old_raw, object_new_raw);
 }
 
 double mlx90632_preprocess_temp_ambient_extended(int16_t ambient_new_raw, int16_t ambient_old_raw, int16_t Gb)

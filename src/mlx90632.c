@@ -44,18 +44,25 @@ static const char mlx90632version[] __attribute__((used)) = { VERSION };
 #define STATIC static
 #endif
 
-int mlx90632_start_measurement(void)
+int32_t mlx90632_trigger_measurement(void)
 {
-    int ret, tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
     uint16_t reg_status;
+    int32_t ret;
 
     ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
     if (ret < 0)
         return ret;
 
     ret = mlx90632_i2c_write(MLX90632_REG_STATUS, reg_status & (~MLX90632_STAT_DATA_RDY));
-    if (ret < 0)
-        return ret;
+
+    return ret;
+}
+
+int32_t mlx90632_wait_for_measurement(void)
+{
+    int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
+    uint16_t reg_status;
+    int32_t ret;
 
     while (tries-- > 0)
     {
@@ -78,6 +85,18 @@ int mlx90632_start_measurement(void)
     }
 
     return (reg_status & MLX90632_STAT_CYCLE_POS) >> 2;
+}
+
+int32_t mlx90632_start_measurement(void)
+{
+    int32_t ret = mlx90632_trigger_measurement();
+
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_wait_for_measurement();
+
+    return ret;
 }
 
 /** Based on @link mlx90632_start_measurement @endlink return value fill channel_new and channel_old
@@ -152,14 +171,20 @@ STATIC int32_t mlx90632_read_temp_ambient_raw(int16_t *ambient_new_raw, int16_t 
  * calculation functions. Because one value is newer than other (see @link mlx90632_start_measurement @endlink) this
  * function provides dynamics based on return value of the @link mlx90632_start_measurement @endlink.
  *
- * @param[in] start_measurement_ret Return value of @link mlx90632_start_measurement @endlink
+ * @param[in] channel_position Channel position where new (recently updated) measurement can be found,
+ *                             usually return value of @link mlx90632_start_measurement @endlink or
+ *                             @link mlx90632_wait_for_measurement @endlink or @link
+ *                             mlx90632_get_channel_position @endlink in case of continuous mode,
+ *                             2 in case of burst mode, and return value of @link
+ *                             mlx90632_wait_for_measurement @endlink or @link
+ *                             mlx90632_get_channel_position @endlink in case of single mode
  * @param[out] *object_new_raw Pointer to memory location where average of new object values from sensor is stored
  * @param[out] *object_old_raw Pointer to memory location where average of old object values from sensor is stored
  *
  * @retval 0 Successfully read both values
  * @retval <0 Something went wrong. Check errno.h for more details.
  */
-STATIC int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
+STATIC int32_t mlx90632_read_temp_object_raw(int32_t channel_position,
                                              int16_t *object_new_raw, int16_t *object_old_raw)
 {
     int32_t ret;
@@ -167,7 +192,7 @@ STATIC int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
     int16_t read;
     uint8_t channel, channel_old;
 
-    ret = mlx90632_channel_new_select(start_measurement_ret, &channel, &channel_old);
+    ret = mlx90632_channel_new_select(channel_position, &channel, &channel_old);
     if (ret != 0)
         return -EINVAL;
 
@@ -195,46 +220,49 @@ STATIC int32_t mlx90632_read_temp_object_raw(int32_t start_measurement_ret,
     return ret;
 }
 
-int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
-                               int16_t *object_new_raw, int16_t *object_old_raw)
+int32_t mlx90632_read_temp_raw_wo_wait(int32_t channel_position,
+                                       int16_t *ambient_new_raw, int16_t *ambient_old_raw,
+                                       int16_t *object_new_raw, int16_t *object_old_raw)
 {
-    int32_t ret, start_measurement_ret;
-
-    // trigger and wait for measurement to complete
-    start_measurement_ret = mlx90632_start_measurement();
-    if (start_measurement_ret < 0)
-        return start_measurement_ret;
-
     /** Read new and old **ambient** values from sensor */
-    ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw);
+    int32_t ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw);
+
     if (ret < 0)
         return ret;
 
     /** Read new and old **object** values from sensor */
-    ret = mlx90632_read_temp_object_raw(start_measurement_ret, object_new_raw, object_old_raw);
+    ret = mlx90632_read_temp_object_raw(channel_position, object_new_raw, object_old_raw);
 
     return ret;
+}
+
+int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
+                               int16_t *object_new_raw, int16_t *object_old_raw)
+{
+    // trigger and wait for measurement to complete
+    int32_t start_measurement_ret = mlx90632_start_measurement();
+
+    if (start_measurement_ret < 0)
+        return start_measurement_ret;
+
+    /** Read raw ambient and object temperature */
+    return mlx90632_read_temp_raw_wo_wait(start_measurement_ret, ambient_new_raw, ambient_old_raw,
+                                          object_new_raw, object_old_raw);
 }
 
 int32_t mlx90632_read_temp_raw_burst(int16_t *ambient_new_raw, int16_t *ambient_old_raw,
                                      int16_t *object_new_raw, int16_t *object_old_raw)
 {
-    int32_t ret, start_measurement_ret;
+    int32_t start_measurement_ret;
 
     // trigger and wait for measurement to complete
     start_measurement_ret = mlx90632_start_measurement_burst();
     if (start_measurement_ret < 0)
         return start_measurement_ret;
 
-    /** Read new and old **ambient** values from sensor */
-    ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw);
-    if (ret < 0)
-        return ret;
-
-    /** Read new and old **object** values from sensor */
-    ret = mlx90632_read_temp_object_raw(2, object_new_raw, object_old_raw);
-
-    return ret;
+    /** Read raw ambient and object temperature */
+    return mlx90632_read_temp_raw_wo_wait(2, ambient_new_raw, ambient_old_raw,
+                                          object_new_raw, object_old_raw);
 }
 
 
@@ -564,11 +592,10 @@ int32_t mlx90632_calculate_dataset_ready_time(void)
     return refresh_time;
 }
 
-int32_t mlx90632_start_measurement_burst(void)
+int32_t mlx90632_trigger_measurement_burst(void)
 {
-    int32_t ret;
-    int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
     uint16_t reg;
+    int32_t ret;
 
     ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
     if (ret < 0)
@@ -577,20 +604,22 @@ int32_t mlx90632_start_measurement_burst(void)
     reg |= MLX90632_START_BURST_MEAS;
 
     ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg);
-    if (ret < 0)
-        return ret;
 
-    ret = mlx90632_calculate_dataset_ready_time();
-    if (ret < 0)
-        return ret;
-    msleep(ret); /* Waiting for refresh of all the measurement tables */
+    return ret;
+}
+
+int32_t mlx90632_wait_for_measurement_burst(void)
+{
+    int tries = MLX90632_MAX_NUMBER_MESUREMENT_READ_TRIES;
+    uint16_t reg_status;
+    int32_t ret;
 
     while (tries-- > 0)
     {
-        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg);
+        ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
         if (ret < 0)
             return ret;
-        if ((reg & MLX90632_STAT_BUSY) == 0)
+        if ((reg_status & MLX90632_STAT_BUSY) == 0)
             break;
         /* minimum wait time to complete measurement
          * should be calculated according to refresh rate
@@ -608,6 +637,43 @@ int32_t mlx90632_start_measurement_burst(void)
     return 0;
 }
 
+int32_t mlx90632_start_measurement_burst(void)
+{
+    int32_t ret = mlx90632_trigger_measurement_burst();
+
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_calculate_dataset_ready_time();
+    if (ret < 0)
+        return ret;
+    msleep(ret); /* Waiting for refresh of all the measurement tables */
+
+    ret = mlx90632_wait_for_measurement_burst();
+
+    return ret;
+}
+
+int32_t mlx90632_trigger_measurement_single(void)
+{
+    uint16_t reg;
+    int32_t ret;
+
+    // Clear NEW_DATA flag
+    ret = mlx90632_trigger_measurement();
+    if (ret < 0)
+        return ret;
+
+    ret = mlx90632_i2c_read(MLX90632_REG_CTRL, &reg);
+    if (ret < 0)
+        return ret;
+
+    reg |= MLX90632_START_SINGLE_MEAS;
+
+    ret = mlx90632_i2c_write(MLX90632_REG_CTRL, reg);
+
+    return ret;
+}
 
 STATIC int32_t mlx90632_unlock_eeporm()
 {
@@ -702,6 +768,18 @@ mlx90632_meas_t mlx90632_get_refresh_rate(void)
         return MLX90632_MEAS_HZ_ERROR;
 
     return (mlx90632_meas_t)MLX90632_REFRESH_RATE(meas1);
+}
+
+int32_t mlx90632_get_channel_position(void)
+{
+    uint16_t reg_status;
+    int32_t ret;
+
+    ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
+    if (ret < 0)
+        return ret;
+
+    return (reg_status & MLX90632_STAT_CYCLE_POS) >> 2;
 }
 
 ///@}
