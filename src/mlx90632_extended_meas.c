@@ -134,6 +134,7 @@ int32_t mlx90632_read_temp_raw_extended_wo_wait(int16_t *ambient_new_raw, int16_
 {
     /** Read new and old **ambient** values from sensor */
     int32_t ret = mlx90632_read_temp_ambient_raw_extended(ambient_new_raw, ambient_old_raw);
+
     if (ret < 0)
         return ret;
 
@@ -173,6 +174,7 @@ int32_t mlx90632_read_temp_raw_extended_burst(int16_t *ambient_new_raw, int16_t 
 {
     // trigger and wait for measurement to complete
     int32_t start_measurement_ret = mlx90632_start_measurement_burst();
+
     if (start_measurement_ret < 0)
         return start_measurement_ret;
 

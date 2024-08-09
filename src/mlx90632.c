@@ -90,6 +90,7 @@ int32_t mlx90632_wait_for_measurement(void)
 int32_t mlx90632_start_measurement(void)
 {
     int32_t ret = mlx90632_trigger_measurement();
+
     if (ret < 0)
         return ret;
 
@@ -225,6 +226,7 @@ int32_t mlx90632_read_temp_raw_wo_wait(int32_t channel_position,
 {
     /** Read new and old **ambient** values from sensor */
     int32_t ret = mlx90632_read_temp_ambient_raw(ambient_new_raw, ambient_old_raw);
+
     if (ret < 0)
         return ret;
 
@@ -239,6 +241,7 @@ int32_t mlx90632_read_temp_raw(int16_t *ambient_new_raw, int16_t *ambient_old_ra
 {
     // trigger and wait for measurement to complete
     int32_t start_measurement_ret = mlx90632_start_measurement();
+
     if (start_measurement_ret < 0)
         return start_measurement_ret;
 
@@ -637,6 +640,7 @@ int32_t mlx90632_wait_for_measurement_burst(void)
 int32_t mlx90632_start_measurement_burst(void)
 {
     int32_t ret = mlx90632_trigger_measurement_burst();
+
     if (ret < 0)
         return ret;
 

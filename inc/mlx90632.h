@@ -69,7 +69,7 @@
 #define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
 #endif
 #define GENMASK(h, l) \
-    ((((1U << h) - 1) | (1U << h)) & ~((1U << l) - 1))
+        ((((1U << h) - 1) | (1U << h)) & ~((1U << l) - 1))
 #endif
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0])) /**< Return number of elements in array */
@@ -210,7 +210,7 @@ typedef enum mlx90632_meas_e {
  * Masks the old register and shifts the new value in
  */
 #define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) \
-    ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
+        ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
 
 /** Read raw ambient and object temperature only when measurement data is ready
  *
@@ -480,7 +480,7 @@ int32_t mlx90632_trigger_measurement_burst(void);
  *
  * @retval <0 Something failed. Check errno.h for more information
  * @retval 0 New data is available and waiting to be processed
- * 
+ *
  * @note This function is using usleep so it is blocking!
  */
 int32_t mlx90632_wait_for_measurement_burst(void);
