@@ -675,12 +675,12 @@ int32_t mlx90632_trigger_measurement_single(void)
     return ret;
 }
 
-STATIC int32_t mlx90632_unlock_eeporm()
+STATIC int32_t mlx90632_unlock_eeporm(void)
 {
     return mlx90632_i2c_write(0x3005, MLX90632_EEPROM_WRITE_KEY);
 }
 
-STATIC int32_t mlx90632_wait_for_eeprom_not_busy()
+STATIC int32_t mlx90632_wait_for_eeprom_not_busy(void)
 {
     uint16_t reg_status;
     int32_t ret = mlx90632_i2c_read(MLX90632_REG_STATUS, &reg_status);
