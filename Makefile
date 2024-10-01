@@ -44,6 +44,7 @@ TARGET = mlx90632
 # Flags
 CFLAGS += -Wall -Wpedantic     # just something for warnings...
 CFLAGS += -Werror              # Make sure we dont have any warnings
+CFLAGS += -Wstrict-prototypes  # Make sure we have strict prototyping for functions
 ARFLAGS = rcs
 # optimization levels
 # -------------------
