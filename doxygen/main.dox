@@ -35,10 +35,6 @@
  * After you have your environment set you need to enter below flow to your program.
  *
  * \code{.c}
- * /* Before include, make sure you have BITS_PER_LONG defined. This is a CPU
- *  * specific value which is used to generate bit masks. You can also use -D
- *  * to input definition to compiler via command line
- *  */
  * #include "mlx90632.h"
  *
  * /* Declare and implement here functions you find in mlx90632_depends.h */
