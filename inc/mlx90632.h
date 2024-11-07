@@ -64,10 +64,6 @@
 #define BIT(x)(1U << (x))
 #endif
 #ifndef GENMASK
-#ifndef BITS_PER_LONG
-#warning "Using default BITS_PER_LONG value"
-#define BITS_PER_LONG 64 /**< Define how many bits per long your CPU has */
-#endif
 #define GENMASK(h, l) \
         ((((1U << h) - 1) | (1U << h)) & ~((1U << l) - 1))
 #endif

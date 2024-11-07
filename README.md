@@ -40,10 +40,6 @@ in library `inc/` folder and you need to point your compiler `-I` flag there.
 After you have your environment set you need to enter below flow to your program.
 
 ```C
-/* Before include, make sure you have BITS_PER_LONG defined. This is a CPU
- * specific value which is used to generate bit masks. You can also use -D
- * to input definition to compiler via command line
- */
 #include "mlx90632.h"
 
 /* Declare and implement here functions you find in mlx90632_depends.h */
@@ -90,10 +86,6 @@ in library `inc/` folder and you need to point your compiler `-I` flag there.
 After you have your environment set you need to enter below flow to your program.
 
 ```C
-/* Before include, make sure you have BITS_PER_LONG defined. This is a CPU
- * specific value which is used to generate bit masks. You can also use -D
- * to input definition to compiler via command line
- */
 #include "mlx90632.h"
 
 /* Declare and implement here functions you find in mlx90632_depends.h */
@@ -109,14 +101,14 @@ int main(void)
     double object; /**< Object temperature in degrees Celsius */
 
     /* Read sensor EEPROM registers needed for calcualtions */
-    
+
     /* You can check if the device supports extended measurement mode */
     ret = mlx90632_init();
     if(status == ERANGE)
     {
        /* Extended mode is supported */
     }
-    
+
     /* Set MLX90632 in extended mode */
     ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED)
     if(ret < 0)
@@ -131,15 +123,15 @@ int main(void)
 
     /* Now start calculations (no more i2c accesses) */
     /* Calculate ambient temperature */
-    ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw, 
+    ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
                                                   PT, PR, PG, PO, Gb);
-    
+
     /* Get preprocessed temperatures needed for object temperature calculation */
     double pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
                                                                    ambient_old_raw, Gb);
     double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
                                                                  ambient_old_raw, Ka);
-    
+
     /* Calculate object temperature assuming the reflected temperature equals ambient*/
     object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 }
@@ -152,10 +144,6 @@ in library `inc/` folder and you need to point your compiler `-I` flag there.
 After you have your environment set you need to enter below flow to your program.
 
 ```C
-/* Before include, make sure you have BITS_PER_LONG defined. This is a CPU
- * specific value which is used to generate bit masks. You can also use -D
- * to input definition to compiler via command line
- */
 #include "mlx90632.h"
 
 /* Declare and implement here functions you find in mlx90632_depends.h */
@@ -171,7 +159,7 @@ int main(void)
     double object; /**< Object temperature in degrees Celsius */
 
     /* Read sensor EEPROM registers needed for calcualtions */
-    
+
     /* Set MLX90632 in burst mode */
     ret = mlx90632_set_meas_type(MLX90632_MTYP_MEDICAL_BURST)
     if(ret < 0)
@@ -208,10 +196,6 @@ in library `inc/` folder and you need to point your compiler `-I` flag there.
 After you have your environment set you need to enter below flow to your program.
 
 ```C
-/* Before include, make sure you have BITS_PER_LONG defined. This is a CPU
- * specific value which is used to generate bit masks. You can also use -D
- * to input definition to compiler via command line
- */
 #include "mlx90632.h"
 
 /* Declare and implement here functions you find in mlx90632_depends.h */
@@ -227,14 +211,14 @@ int main(void)
     double object; /**< Object temperature in degrees Celsius */
 
     /* Read sensor EEPROM registers needed for calcualtions */
-    
+
     /* You can check if the device supports extended measurement mode */
     ret = mlx90632_init();
     if(status == ERANGE)
     {
        /* Extended mode is supported */
     }
-    
+
     /* Set MLX90632 in extended burst mode */
     ret = mlx90632_set_meas_type(MLX90632_MTYP_EXTENDED_BURST)
     if(ret < 0)
@@ -249,15 +233,15 @@ int main(void)
 
     /* Now start calculations (no more i2c accesses) */
     /* Calculate ambient temperature */
-    ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw, 
+    ambient = mlx90632_calc_temp_ambient_extended(ambient_new_raw, ambient_old_raw,
                                                   PT, PR, PG, PO, Gb);
-    
+
     /* Get preprocessed temperatures needed for object temperature calculation */
     double pre_ambient = mlx90632_preprocess_temp_ambient_extended(ambient_new_raw,
                                                                    ambient_old_raw, Gb);
     double pre_object = mlx90632_preprocess_temp_object_extended(object_new_raw, ambient_new_raw,
                                                                  ambient_old_raw, Ka);
-    
+
     /* Calculate object temperature assuming the reflected temperature equals ambient*/
     object = mlx90632_calc_temp_object_extended(pre_object, pre_ambient, ambient, Ea, Eb, Ga, Fa, Fb, Ha, Hb);
 }
@@ -272,6 +256,6 @@ faster development with automatic mocking ([CMock](http://www.throwtheswitch.org
 and wider range of unit test macros ([Unity](http://www.throwtheswitch.org/unity/)).
 Because of it, cloning repository requires adding a `--recursive` flag
 (so `git clone --recursive <url> <destination>`) or initialization of submodules
-afterwards using `git submodule update --init --recursive`. 
+afterwards using `git submodule update --init --recursive`.
 
 
