@@ -24,7 +24,7 @@ jobs:
         sudo apt update
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov wget
         pip install gcovr==5.0
-        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/1.0.0/ceedling-1.0.0.gem -O ceedling.gem
+        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/v1.0.0/ceedling-1.0.0.gem -O ceedling.gem
         sudo gem install ceedling.gem
         sudo gem install coveralls-lcov
         sudo ln -fs /usr/bin/gcov-${{ matrix.gcc_version }} /usr/bin/gcov
