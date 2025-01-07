@@ -2,10 +2,13 @@
   :test:
     :compile:
       :*:
+        - -Wno-pointer-to-int-cast
+        - -Wno-int-to-pointer-cast
         - -Wall
         - -Wno-address
         - -Wno-attributes
         - -Wno-unused-function
+        - -Wno-newline-eof
         - -std=c99
         - -fshort-enums
         - -pedantic
@@ -16,81 +19,21 @@
         - -lm
         - -lgcov
         - --coverage
+        - -Wno-newline-eof
 
 :tools:
   :compiler:
     :executable: clang
-    :arguments:
-      - -Wno-pointer-to-int-cast
-      - -Wno-int-to-pointer-cast
-      - -Wall
-      - -Wno-address
-      - -Wno-attributes
-      - -Wno-unused-function
-      - -std=c99
-      - -fshort-enums
-      - -pedantic
-      - -fprofile-arcs
-      - -ftest-coverage
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
   :linker:
     :executable: clang
-    :arguments:
-      - -lm
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-      - -lgcov
-      - --coverage
-      - -o ${2}            #executable file output (Ruby method call param list sub)
   :test_compiler:
     :executable: clang
-    :arguments:
-      - -Wno-pointer-to-int-cast
-      - -Wno-int-to-pointer-cast
-      - -Wall
-      - -Wno-address
-      - -Wno-attributes
-      - -Wno-unused-function
-      - -std=c99
-      - -fshort-enums
-      - -pedantic
-      - -fprofile-arcs
-      - -ftest-coverage
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
   :test_linker:
     :executable: clang
-    :arguments:
-      - -lm
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-      - -lgcov
-      - --coverage
   :gcov_compiler:
     :executable: clang
-    :arguments:
-      - -Wno-pointer-to-int-cast
-      - -Wno-int-to-pointer-cast
-      - -Wall
-      - -Wno-address
-      - -Wno-attributes
-      - -Wno-unused-function
-      - -std=c99
-      - -fshort-enums
-      - -pedantic
-      - -fprofile-arcs
-      - -ftest-coverage
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
   :gcov_linker:
     :executable: clang
-    :arguments:
-      - -lm
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-      - -lgcov
-      - --coverage
   :gcov_fixture:
     :executable: ${1}
   :gcov_report:
@@ -115,3 +58,41 @@
   :backtrace_settings:
     :executable: donotusethis
     :optional: TRUE
+
+# Add -gcov to the plugins list to make sure of the gcov plugin
+# You will need to have gcov and gcovr both installed to make it work.
+# For more information on these options, see docs in plugins/gcov
+:gcov:
+  :utilities:
+    - gcovr           # Use gcovr to create the specified reports (default).
+    #- ReportGenerator # Use ReportGenerator to create the specified reports.
+  :reports: # Specify one or more reports to generate.
+    # Make an HTML summary report.
+    # - HtmlBasic
+    - HtmlDetailed
+    # - Text
+    # - Cobertura
+    # - SonarQube
+    # - JSON
+    # - HtmlInline
+    # - HtmlInlineAzure
+    # - HtmlInlineAzureDark
+    # - HtmlChart
+    # - MHtml
+    # - Badges
+    # - CsvSummary
+    # - Latex
+    # - LatexSummary
+    # - PngChart
+    # - TeamCitySummary
+    # - lcov
+    # - Xml
+    # - XmlSummary
+  :gcovr:
+    # :html_artifact_filename: TestCoverageReport.html
+    # :html_title: Test Coverage Report
+    :html_medium_threshold: 75
+    :html_high_threshold: 90
+    # :html_absolute_paths: TRUE
+    # :html_encoding: UTF-8
+

@@ -1,8 +1,10 @@
 :project:
+  :ceedling_version: '?'
+
   :use_exceptions: FALSE
   :compile_threads: 1
   :test_threads: 1
-  :use_test_preprocessor: TRUE
+  :use_test_preprocessor: :all
   :use_auxiliary_dependencies: TRUE
   :use_deep_dependencies: TRUE
   :use_mocks: TRUE
@@ -16,6 +18,12 @@
 #  :output: TempSensor.out
 #  :use_assembly: FALSE
 
+# Specify where to find mixins and any that should be enabled automatically
+:mixins:
+  :enabled: []
+  :load_paths:
+    - targets/
+
 :environment: []
 
 :extension:
@@ -24,15 +32,12 @@
 :paths:
   :test:
     - +:test/*
-    - tools/ceedling/vendor/unity/src/
-    - tools/ceedling/vendor/cmock/src/
   :source:
     - +:src/**
   :include:
     - +:inc/**
 
 :defines:
-  :common: &common_defines ""
   :test:
     - STATIC=""
     - INLINE=""
@@ -75,9 +80,8 @@
     :optional: TRUE
 
 :plugins:
-  :load_paths:
-    - tools/ceedling/plugins
+  :load_paths: []
   :enabled:
-    - stdout_pretty_tests_report
+    - report_tests_pretty_stdout
     - gcov
 :colors: true

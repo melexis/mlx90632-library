@@ -5,69 +5,29 @@
         - -m64
         - -Wall
         - -Wno-address
+        - -Wno-attributes
+        - -Wno-unused-function
         - -std=c99
         - -pedantic
-        - -g
         - -fprofile-arcs
         - -ftest-coverage
+        - -lm
     :link:
       :*:
         - -lm
         - -m64
         - -lgcov
         - --coverage
-  :gcov:
-    :compile:
-      :*:
-        - -m64
-        - -Wall
-        - -Wno-address
-        - -Wno-attributes
-        - -Wno-unused-function
-        - -std=c99
-        - -pedantic
-        - -g
-        - -fprofile-arcs
-        - -ftest-coverage
-
 
 :tools:
   :test_compiler:
     :executable: gcc
-    :arguments:
-      - -m64
-      - -Wall
-      - -Wno-address
-      - -Wno-attributes
-      - -Wno-unused-function
-      - -std=c99
-      - -pedantic
-      - -g
-      - -fprofile-arcs
-      - -ftest-coverage
   :test_linker:
     :executable: gcc
-    :arguments:
-      - -lm
-      - -m64
-      - -lgcov
-      - --coverage
   :gcov_compiler:
     :executable: gcc
-    :arguments:
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
   :gcov_linker:
     :executable: gcc
-    :arguments:
-      - -lm
-      - -m64
-      - -lgcov
-      - --coverage
-      - -D$: COLLECTION_DEFINES_TEST_AND_VENDOR
-      - -I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
-  :gcov_fixture:
-    :executable: ${1}
   :gcov_report:
     :executable: gcov
     :arguments:
@@ -90,4 +50,41 @@
   :backtrace_settings:
     :executable: donotusethis
     :optional: TRUE
+
+# Add -gcov to the plugins list to make sure of the gcov plugin
+# You will need to have gcov and gcovr both installed to make it work.
+# For more information on these options, see docs in plugins/gcov
+:gcov:
+  :utilities:
+    - gcovr           # Use gcovr to create the specified reports (default).
+    #- ReportGenerator # Use ReportGenerator to create the specified reports.
+  :reports: # Specify one or more reports to generate.
+    # Make an HTML summary report.
+    # - HtmlBasic
+    - HtmlDetailed
+    # - Text
+    # - Cobertura
+    # - SonarQube
+    # - JSON
+    # - HtmlInline
+    # - HtmlInlineAzure
+    # - HtmlInlineAzureDark
+    # - HtmlChart
+    # - MHtml
+    # - Badges
+    # - CsvSummary
+    # - Latex
+    # - LatexSummary
+    # - PngChart
+    # - TeamCitySummary
+    # - lcov
+    # - Xml
+    # - XmlSummary
+  :gcovr:
+    # :html_artifact_filename: TestCoverageReport.html
+    # :html_title: Test Coverage Report
+    :html_medium_threshold: 75
+    :html_high_threshold: 90
+    # :html_absolute_paths: TRUE
+    # :html_encoding: UTF-8
 

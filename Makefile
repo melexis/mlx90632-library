@@ -113,12 +113,12 @@ lib$(TARGET).a: $(C_OBJS)
 utest:
 	@echo "Building and executing unit tests as executable on PC"
 	@mkdir -p build
-	@ceedling -m -j 4 options:$(CC) clobber test:all
+	@ceedling -m $(CC) clobber test:all
 
 coverage:
 	@echo "Produce coverage information"
 	@mkdir -p build
-	@ceedling -m -j 4 options:$(CC) clobber gcov:all
+	@ceedling -m $(CC) clobber gcov:all
 	@lcov --directory $(OBJDIR)/gcov/out/ --output-file $(OBJDIR)/lcov.info $(LCOVFLAGS) $(LCOVCONFIG)
 	@genhtml $(OBJDIR)/lcov.info -o $(OBJDIR)/coverage/ $(LCOVCONFIG)
 
