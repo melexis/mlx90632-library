@@ -45,6 +45,14 @@
     - BITS_PER_LONG=64
     - UNITY_INCLUDE_DOUBLE
     - UNITY_SUPPORT_TEST_CASES
+
+:libraries:
+  :placement: :end
+  :flag: "-l${1}"
+  :path_flag: "-L ${1}"
+  :system:
+    - m
+
 :cmock:
   :framework: :unity
   :when_no_prototypes: :warn
