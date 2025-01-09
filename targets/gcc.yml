@@ -18,38 +18,26 @@
         - -m64
         - -lgcov
         - --coverage
+  :gcov:
+    :*:
+      - -m64
+      - -Wall
+      - -Wno-address
+      - -Wno-attributes
+      - -Wno-unused-function
+      - -std=c99
+      - -pedantic
+      - -fprofile-arcs
+      - -ftest-coverage
+      - -lm
+      - -lgcov
+      - --coverage
 
 :tools:
   :test_compiler:
     :executable: gcc
   :test_linker:
     :executable: gcc
-  :gcov_compiler:
-    :executable: gcc
-  :gcov_linker:
-    :executable: gcc
-  :gcov_report:
-    :executable: gcov
-    :arguments:
-      - -n
-      - -p
-      - -b
-      - -o "$": GCOV_BUILD_OUTPUT_PATH
-      - "\"${1}\""
-  :gcov_post_report:
-    :executable: gcovr
-    :optional: FALSE
-    :arguments:
-        - -p
-        - -b
-        - -e '.*tools.*|.*build.*|.*test/Test.*'
-        - --html
-        - --html-details
-        - -r .
-        - -o build/artifacts/gcov/index.html
-  :backtrace_settings:
-    :executable: donotusethis
-    :optional: TRUE
 
 # Add -gcov to the plugins list to make sure of the gcov plugin
 # You will need to have gcov and gcovr both installed to make it work.
