@@ -28,7 +28,6 @@ jobs:
         wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/v1.0.0/ceedling-1.0.0.gem -O ceedling.gem
         sudo gem install ceedling.gem
         sudo gem install coveralls-lcov
-        sudo ln -fs /usr/bin/gcov-${{ matrix.gcc_version }} /usr/bin/gcov
     - name: Install branch v1.15 of lcov
       run: |
         git clone --branch=v1.15 https://github.com/linux-test-project/lcov.git
