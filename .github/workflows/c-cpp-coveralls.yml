@@ -24,7 +24,7 @@ jobs:
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt update
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov wget
-        pip install gcovr==8.2
+        pip install --user gcovr==8.2
         wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/v1.0.0/ceedling-1.0.0.gem -O ceedling.gem
         sudo gem install ceedling.gem
         sudo gem install coveralls-lcov
@@ -37,7 +37,9 @@ jobs:
         cd -
     - name: Make coverage
       run: |
-        make CC=gcc coverage
+        make coverage
+      env:
+        CC: gcc-${{ matrix.gcc_version }}
     - name: Submit results to Coveralls
       uses: coverallsapp/github-action@master
       with:
