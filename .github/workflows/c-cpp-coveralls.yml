@@ -37,7 +37,7 @@ jobs:
         cd -
     - name: Make coverage
       run: |
-        make coverage
+        make CC=gcc coverage
     - name: Submit results to Coveralls
       uses: coverallsapp/github-action@master
       with:
