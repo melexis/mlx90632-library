@@ -27,6 +27,7 @@
       - -Wno-unused-function
       - -std=c99
       - -pedantic
+      - -g
       - -fprofile-arcs
       - -ftest-coverage
       - -lm
