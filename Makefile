@@ -118,7 +118,7 @@ utest:
 coverage:
 	@echo "Produce coverage information"
 	@mkdir -p build
-	@ceedling -m $(CC) clobber gcov:all
+	@ceedling -v=5 -m $(CC) clobber gcov:all
 	@lcov --directory $(OBJDIR)/gcov/out/ --output-file $(OBJDIR)/lcov.info $(LCOVFLAGS) $(LCOVCONFIG)
 	@genhtml $(OBJDIR)/lcov.info -o $(OBJDIR)/coverage/ $(LCOVCONFIG)
 
