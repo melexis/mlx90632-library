@@ -13,21 +13,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        gcc_version: ['10']
+        gcc_version: ['13']
         os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install gcc-${{ matrix.gcc_version }} and other dependencies
       run: |
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt update
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov wget
-        pip install gcovr==5.0
-        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/1.0.0-60c24c2/ceedling-1.0.0-60c24c2.gem -O ceedling.gem
+        pip install --user gcovr==8.2
+        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/v1.0.0/ceedling-1.0.0.gem -O ceedling.gem
         sudo gem install ceedling.gem
         sudo gem install coveralls-lcov
-        sudo ln -fs /usr/bin/gcov-${{ matrix.gcc_version }} /usr/bin/gcov
     - name: Install branch v1.15 of lcov
       run: |
         git clone --branch=v1.15 https://github.com/linux-test-project/lcov.git
@@ -37,6 +37,8 @@ jobs:
     - name: Make coverage
       run: |
         make coverage
+      env:
+        CC: gcc-${{ matrix.gcc_version }}
     - name: Submit results to Coveralls
       uses: coverallsapp/github-action@master
       with:

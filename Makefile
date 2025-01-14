@@ -113,13 +113,12 @@ lib$(TARGET).a: $(C_OBJS)
 utest:
 	@echo "Building and executing unit tests as executable on PC"
 	@mkdir -p build
-	@rake -m -j 4 options:$(CC) clobber test:all
+	@ceedling -m $(CC) clobber test:all
 
 coverage:
 	@echo "Produce coverage information"
 	@mkdir -p build
-	@rm -f tools/ceedling/plugins/gcov/config/defaults.yml # we delete these because settings are merged
-	@rake -m -j 4 options:$(CC) clobber gcov:all
+	@ceedling -m $(CC) clobber gcov:all
 	@lcov --directory $(OBJDIR)/gcov/out/ --output-file $(OBJDIR)/lcov.info $(LCOVFLAGS) $(LCOVCONFIG)
 	@genhtml $(OBJDIR)/lcov.info -o $(OBJDIR)/coverage/ $(LCOVCONFIG)
 
@@ -151,7 +150,7 @@ cscope:
 	@find . -name "*.c" >> cscope.files
 	@find . -name "*.h" >> cscope.files
 	@cscope -b
-	@ctags --fields=+l --langmap=c:.c.h $(SRCS) inc/* tools/ceedling/vendor/unity/src/*
+	@ctags --fields=+l --langmap=c:.c.h $(SRCS) inc/*
 
 # ==============================
 # Include automatic dependencies
