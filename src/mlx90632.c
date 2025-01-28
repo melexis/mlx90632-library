@@ -188,7 +188,7 @@ STATIC int32_t mlx90632_read_temp_object_raw(int32_t channel_position,
                                              int16_t *object_new_raw, int16_t *object_old_raw)
 {
     int32_t ret;
-    uint16_t read_tmp;
+    uint16_t read_temp[2];
     int16_t read;
     uint8_t channel, channel_old;
 
@@ -196,26 +196,19 @@ STATIC int32_t mlx90632_read_temp_object_raw(int32_t channel_position,
     if (ret != 0)
         return -EINVAL;
 
-    ret = mlx90632_i2c_read(MLX90632_RAM_2(channel), &read_tmp);
+    ret = mlx90632_i2c_read32(MLX90632_RAM_1(channel), read_temp);
     if (ret < 0)
-        return ret;
+    	return ret;
 
-    read = (int16_t)read_tmp;
+    read = (int16_t)read_temp[1];
+    *object_new_raw = (read + (int16_t)read_temp[0]) >> 1;
 
-    ret = mlx90632_i2c_read(MLX90632_RAM_1(channel), &read_tmp);
+    ret = mlx90632_i2c_read32(MLX90632_RAM_1(channel_old), read_temp);
     if (ret < 0)
-        return ret;
-    *object_new_raw = (read + (int16_t)read_tmp) / 2;
+    	return ret;
 
-    ret = mlx90632_i2c_read(MLX90632_RAM_2(channel_old), &read_tmp);
-    if (ret < 0)
-        return ret;
-    read = (int16_t)read_tmp;
-
-    ret = mlx90632_i2c_read(MLX90632_RAM_1(channel_old), &read_tmp);
-    if (ret < 0)
-        return ret;
-    *object_old_raw = (read + (int16_t)read_tmp) / 2;
+    read = (int16_t)read_temp[1];
+    *object_old_raw = (read + (int16_t)read_temp[0]) >> 1;
 
     return ret;
 }
