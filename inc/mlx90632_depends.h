@@ -48,6 +48,21 @@
  */
 extern int32_t mlx90632_i2c_read(int16_t register_address, uint16_t *value);
 
+/** Read from two addresses from the mlx90632
+ *
+ * i2c read is processor specific and this function expects to have address of mlx90632 known, as it operates purely on
+ * register addresses.
+ *
+ * @note Needs to be implemented externally
+ * @param[in] register_address Address of the register to be read from
+ * @param[out] *value32 pointer to uint16_t array where read data can be written
+
+ * @retval 0 for success
+ * @retval <0 for failure
+ *
+ */
+extern int32_t mlx90632_i2c_read32(int16_t register_address, uint16_t* value32);
+
 /** Write value to register_address of the mlx90632
  *
  * i2c write is processor specific and this function expects to have address of mlx90632 known, as it operates purely
