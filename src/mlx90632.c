@@ -675,7 +675,7 @@ int32_t mlx90632_trigger_measurement_single(void)
     return ret;
 }
 
-STATIC int32_t mlx90632_unlock_eeporm(void)
+STATIC int32_t mlx90632_unlock_eeprom(void)
 {
     return mlx90632_i2c_write(0x3005, MLX90632_EEPROM_WRITE_KEY);
 }
@@ -695,7 +695,7 @@ STATIC int32_t mlx90632_wait_for_eeprom_not_busy(void)
 
 STATIC int32_t mlx90632_erase_eeprom(uint16_t address)
 {
-    int32_t ret = mlx90632_unlock_eeporm();
+    int32_t ret = mlx90632_unlock_eeprom();
 
     if (ret < 0)
         return ret;
@@ -715,7 +715,7 @@ STATIC int32_t mlx90632_write_eeprom(uint16_t address, uint16_t data)
     if (ret < 0)
         return ret;
 
-    ret = mlx90632_unlock_eeporm();
+    ret = mlx90632_unlock_eeprom();
     if (ret < 0)
         return ret;
 

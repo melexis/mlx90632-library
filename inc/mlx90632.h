@@ -208,6 +208,8 @@ typedef enum mlx90632_meas_e {
 #define MLX90632_NEW_REG_VALUE(old_reg, new_value, h, l) \
         ((old_reg & (0xFFFF ^ GENMASK(h, l))) | (new_value << MLX90632_EE_REFRESH_RATE_SHIFT))
 
+#define mlx90632_unlock_eeporm mlx90632_unlock_eeprom __attribute__ ((deprecated("Renamed to mlx90632_unlock_eeprom")))
+
 /** Read raw ambient and object temperature only when measurement data is ready
  *
  * Read raw ambient and object temperatures without waiting. This values still need
