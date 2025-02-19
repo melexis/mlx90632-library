@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        gcc_version: ['11','12','13']
+        gcc_version: ['11','12','13','14']
         os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v3
@@ -25,7 +25,7 @@ jobs:
         sudo apt update
         sudo apt-get install -y gcc-${{ matrix.gcc_version }} ruby rake gcc-multilib lcov wget
         pip install --user gcovr==8.2
-        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/v1.0.0/ceedling-1.0.0.gem -O ceedling.gem
+        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/1.0.1/ceedling-1.0.1.gem -O ceedling.gem
         sudo gem install ceedling.gem
     - name: Unit tests
       run: make utest CC=gcc
@@ -36,7 +36,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        clang_version: ['11','12','13','14','15']
+        clang_version: ['14','15','16','17']
         os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v3
@@ -46,7 +46,7 @@ jobs:
       run: |
         sudo apt-get install -y clang-${{ matrix.clang_version }} ruby rake gcc-multilib lcov wget
         pip install --user gcovr==8.2
-        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/v1.0.0/ceedling-1.0.0.gem -O ceedling.gem
+        wget https://github.com/ThrowTheSwitch/Ceedling/releases/download/1.0.1/ceedling-1.0.1.gem -O ceedling.gem
         sudo gem install ceedling.gem
         sudo ln -fs /usr/bin/clang-${{ matrix.clang_version }} /usr/bin/clang
         sudo ln -fs /usr/bin/llvm-cov-${{ matrix.clang_version }} /usr/bin/llvm-cov

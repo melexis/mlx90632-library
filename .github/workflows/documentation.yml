@@ -14,9 +14,9 @@ jobs:
         pip3 install mlx.warnings
     - name: Execute and build documentation
       run: |
-        mlx-warnings --doxygen --exact-warnings 3 --command make doxy
+        mlx-warnings --doxygen --exact-warnings 1 --command make doxy
     - name: Upload HTML documentation
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: html-doc
         path: ./build/html/doxygen/html
@@ -27,14 +27,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download HTML documentation from job 'test'
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: html-doc
         path: ./build/html/doxygen/html
     - name: Disable jekyll
       run: touch ./build/html/doxygen/html/.nojekyll
     - name: Deploy documentation
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./build/html/doxygen/html
