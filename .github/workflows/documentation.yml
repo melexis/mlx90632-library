@@ -14,7 +14,7 @@ jobs:
         pip3 install mlx.warnings
     - name: Execute and build documentation
       run: |
-        mlx-warnings --doxygen --exact-warnings 3 --command make doxy
+        mlx-warnings --doxygen --exact-warnings 1 --command make doxy
     - name: Upload HTML documentation
       uses: actions/upload-artifact@v4
       with:
